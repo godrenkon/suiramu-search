@@ -162,9 +162,10 @@ A. 使えます。本物のChromiumが動いているので、通常通りログ
 
 ## 📞 サポート
 
-- 🐦 Twitter: [@Riku_verse_](https://x.com/Riku_verse_)
 - 🐛 不具合報告・ご要望: [Issues](https://github.com/godrenkon/suiramu-search/issues/new/choose)
 
 ---
 
 *Made for students who just want to search and watch, without the fuss.*
+
+godrenkon / [@Riku_verse_](https://x.com/Riku_verse_)
