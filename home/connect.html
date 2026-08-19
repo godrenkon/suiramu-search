@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="0; url=vnc.html?autoconnect=true&resize=scale&reconnect=true&show_dot=true">
+<title>Suiramu へ接続中...</title>
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', sans-serif;
+    background: #111;
+    color: #eee;
+  }
+  .box { text-align: center; }
+  .logo {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 12px;
+  }
+  .msg { font-size: 14px; color: #999; }
+  a { color: #8b5cf6; }
+</style>
+</head>
+<body>
+  <div class="box">
+    <div class="logo">Suiramu</div>
+    <div class="msg">
+      接続しています…<br>
+      自動で画面が切り替わらない場合は
+      <a href="vnc.html?autoconnect=true&resize=scale&reconnect=true">こちらをクリック</a>
+    </div>
+  </div>
+</body>
+</html>
