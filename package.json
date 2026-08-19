@@ -1,0 +1,12 @@
+{
+  "name": "page",
+  "version": "1.0.0",
+  "description": "制限されたネットワークでも世界中のサイトにアクセス可能にするツール",
+  "scripts": {
+    "archive": "node scripts/archive.js"
+  },
+  "dependencies": {
+    "puppeteer": "^21.0.0",
+    "octokit": "^2.0.0"
+  }
+}
