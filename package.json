@@ -1,7 +1,7 @@
 {
   "name": "suiramu-search",
-  "version": "3.1.0",
-  "description": "Suiramu Search (S²) - 超検索特化・超動画特化のリモートブラウザ環境（GitHub Codespace上で動作）",
+  "version": "3.1.1",
+  "description": "Suiramu Search (S.S.) - 超検索特化・超動画特化のリモートブラウザ環境（GitHub Codespace上で動作）",
   "scripts": {
     "search": "bash .devcontainer/start_search.sh",
     "video": "bash .devcontainer/start_video.sh",
