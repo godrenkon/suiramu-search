@@ -291,6 +291,7 @@
     <div class="sidebar-item" onclick="showAlert('bookmarks_info')">⭐ <span data-i18n="menu_bookmarks"></span></div>
     <div class="sidebar-item" onclick="showAlert('history_info')">🕘 <span data-i18n="menu_history"></span></div>
     <div class="sidebar-item" onclick="window.open('https://github.com/godrenkon/page','_blank')">📄 <span data-i18n="menu_about"></span></div>
+    <div class="sidebar-item" onclick="openContactModal()">✉️ <span data-i18n="menu_contact"></span></div>
     <div class="sidebar-item" onclick="window.open('https://x.com/Riku_verse_','_blank')">🐦 <span data-i18n="menu_twitter"></span></div>
     <div class="sidebar-item" onclick="toggleAccountModal()">👤 <span data-i18n="menu_account"></span></div>
   </div>
@@ -326,11 +327,27 @@
     </div>
   </div>
 
+  <div class="modal-bg" id="contactModalBg" onclick="if(event.target===this) closeContactModal()">
+    <div class="modal">
+      <h3 data-i18n="contact_title"></h3>
+      <select id="contactType" class="lang-select" style="width:100%; margin-bottom:12px;">
+        <option value="contact" data-i18n="contact_type_contact"></option>
+        <option value="feature" data-i18n="contact_type_feature"></option>
+      </select>
+      <input type="text" id="contactSubject" data-i18n-placeholder="contact_subject_placeholder">
+      <textarea id="contactBody" data-i18n-placeholder="contact_body_placeholder" rows="5"
+        style="width:100%; padding:10px 14px; border:1px solid #ddd; border-radius:8px; margin-bottom:12px; font-size:14px; font-family:inherit; resize:vertical;"></textarea>
+      <button onclick="submitContact()" data-i18n="contact_submit"></button>
+      <p class="note" data-i18n="contact_note"></p>
+    </div>
+  </div>
+
 <script>
   const I18N = {
     ja: {
       menu_home: 'ホーム', menu_bookmarks: '保存サイトについて', menu_history: '履歴・タブの使い方',
       menu_about: 'このツールについて', menu_twitter: '公式Twitter', menu_account: 'アカウント設定',
+      menu_contact: 'お問い合わせ・要望',
       search_placeholder: '検索、またはURLを入力', search_button: '検索',
       news_label: '最新のお知らせ', news_title: '公式Twitterで最新情報をチェック →',
       profile_title: 'プロフィール設定', profile_placeholder: '表示名を入力', profile_save: '保存する',
@@ -339,11 +356,18 @@
       history_info: '閲覧履歴は Ctrl+H で見れます（Chrome標準機能）\n新しいタブは Ctrl+T です',
       add_site_name: 'サイト名を入力してください（例: Google）',
       add_site_url: 'URLを入力してください（例: https://google.com）',
-      confirm_remove: 'このサイトを削除しますか？', add_tile: '追加'
+      confirm_remove: 'このサイトを削除しますか？', add_tile: '追加',
+      contact_title: 'お問い合わせ・ご要望', contact_type_contact: '💬 お問い合わせ', contact_type_feature: '💡 ご要望',
+      contact_subject_placeholder: 'タイトル（例: ログインできません）',
+      contact_body_placeholder: '内容を詳しく書いてください',
+      contact_submit: 'GitHubで送信する',
+      contact_note: '送信するとGitHubのIssue作成画面が開きます。送信にはGitHubアカウントが必要です。内容はこのツールの開発者に公開で届きます。',
+      contact_need_input: 'タイトルと内容を入力してください'
     },
     en: {
       menu_home: 'Home', menu_bookmarks: 'About saved sites', menu_history: 'History & tabs',
       menu_about: 'About this tool', menu_twitter: 'Official Twitter', menu_account: 'Account settings',
+      menu_contact: 'Contact / Feedback',
       search_placeholder: 'Search or enter a URL', search_button: 'Search',
       news_label: 'Latest news', news_title: 'Check the latest updates on Twitter →',
       profile_title: 'Profile settings', profile_placeholder: 'Enter a display name', profile_save: 'Save',
@@ -352,11 +376,18 @@
       history_info: 'Press Ctrl+H for browsing history (built into Chrome)\nPress Ctrl+T for a new tab',
       add_site_name: 'Enter a site name (e.g. Google)',
       add_site_url: 'Enter a URL (e.g. https://google.com)',
-      confirm_remove: 'Remove this site?', add_tile: 'Add'
+      confirm_remove: 'Remove this site?', add_tile: 'Add',
+      contact_title: 'Contact / Feedback', contact_type_contact: '💬 Contact', contact_type_feature: '💡 Feature request',
+      contact_subject_placeholder: 'Title (e.g. Can\'t log in)',
+      contact_body_placeholder: 'Please describe the details',
+      contact_submit: 'Send via GitHub',
+      contact_note: 'This opens a GitHub Issue form. A GitHub account is required to send it. Your message will be publicly visible to the developer.',
+      contact_need_input: 'Please enter a title and description'
     },
     zh: {
       menu_home: '主页', menu_bookmarks: '关于保存的网站', menu_history: '历史记录与标签页',
       menu_about: '关于此工具', menu_twitter: '官方推特', menu_account: '账户设置',
+      menu_contact: '联系我们 / 意见反馈',
       search_placeholder: '搜索或输入网址', search_button: '搜索',
       news_label: '最新公告', news_title: '在官方推特查看最新消息 →',
       profile_title: '个人资料设置', profile_placeholder: '输入显示名称', profile_save: '保存',
@@ -365,11 +396,18 @@
       history_info: '按 Ctrl+H 查看浏览历史（Chrome 自带功能）\n按 Ctrl+T 打开新标签页',
       add_site_name: '请输入网站名称（例如：Google）',
       add_site_url: '请输入网址（例如：https://google.com）',
-      confirm_remove: '要删除此网站吗？', add_tile: '添加'
+      confirm_remove: '要删除此网站吗？', add_tile: '添加',
+      contact_title: '联系我们 / 意见反馈', contact_type_contact: '💬 联系我们', contact_type_feature: '💡 功能建议',
+      contact_subject_placeholder: '标题（例如：无法登录）',
+      contact_body_placeholder: '请详细描述内容',
+      contact_submit: '通过 GitHub 发送',
+      contact_note: '点击后将打开 GitHub Issue 创建页面，发送需要 GitHub 账号。内容将公开发送给开发者。',
+      contact_need_input: '请输入标题和内容'
     },
     ko: {
       menu_home: '홈', menu_bookmarks: '저장된 사이트 안내', menu_history: '기록 및 탭 사용법',
       menu_about: '이 도구에 대해', menu_twitter: '공식 트위터', menu_account: '계정 설정',
+      menu_contact: '문의 / 건의사항',
       search_placeholder: '검색어 또는 URL 입력', search_button: '검색',
       news_label: '최신 소식', news_title: '공식 트위터에서 최신 소식 확인하기 →',
       profile_title: '프로필 설정', profile_placeholder: '표시 이름 입력', profile_save: '저장',
@@ -378,11 +416,18 @@
       history_info: 'Ctrl+H로 방문 기록을 볼 수 있습니다 (Chrome 기본 기능)\nCtrl+T로 새 탭을 열 수 있습니다',
       add_site_name: '사이트 이름을 입력하세요 (예: Google)',
       add_site_url: 'URL을 입력하세요 (예: https://google.com)',
-      confirm_remove: '이 사이트를 삭제하시겠습니까?', add_tile: '추가'
+      confirm_remove: '이 사이트를 삭제하시겠습니까?', add_tile: '추가',
+      contact_title: '문의 / 건의사항', contact_type_contact: '💬 문의하기', contact_type_feature: '💡 기능 제안',
+      contact_subject_placeholder: '제목 (예: 로그인이 안돼요)',
+      contact_body_placeholder: '자세한 내용을 입력해 주세요',
+      contact_submit: 'GitHub로 보내기',
+      contact_note: '전송 시 GitHub Issue 작성 화면이 열립니다. 전송하려면 GitHub 계정이 필요합니다. 내용은 개발자에게 공개로 전달됩니다.',
+      contact_need_input: '제목과 내용을 입력해 주세요'
     },
     es: {
       menu_home: 'Inicio', menu_bookmarks: 'Sobre sitios guardados', menu_history: 'Historial y pestañas',
       menu_about: 'Acerca de esta herramienta', menu_twitter: 'Twitter oficial', menu_account: 'Configuración de cuenta',
+      menu_contact: 'Contacto / Sugerencias',
       search_placeholder: 'Buscar o escribir una URL', search_button: 'Buscar',
       news_label: 'Últimas noticias', news_title: 'Consulta las últimas novedades en Twitter →',
       profile_title: 'Configuración de perfil', profile_placeholder: 'Introduce un nombre para mostrar', profile_save: 'Guardar',
@@ -391,11 +436,18 @@
       history_info: 'Presiona Ctrl+H para ver el historial (función nativa de Chrome)\nPresiona Ctrl+T para una nueva pestaña',
       add_site_name: 'Introduce el nombre del sitio (ej: Google)',
       add_site_url: 'Introduce una URL (ej: https://google.com)',
-      confirm_remove: '¿Eliminar este sitio?', add_tile: 'Añadir'
+      confirm_remove: '¿Eliminar este sitio?', add_tile: 'Añadir',
+      contact_title: 'Contacto / Sugerencias', contact_type_contact: '💬 Contacto', contact_type_feature: '💡 Sugerencia de función',
+      contact_subject_placeholder: 'Título (ej: No puedo iniciar sesión)',
+      contact_body_placeholder: 'Describe los detalles, por favor',
+      contact_submit: 'Enviar vía GitHub',
+      contact_note: 'Esto abrirá un formulario de Issue de GitHub. Se necesita una cuenta de GitHub para enviarlo. Tu mensaje será visible públicamente para el desarrollador.',
+      contact_need_input: 'Por favor, introduce un título y una descripción'
     },
     fr: {
       menu_home: 'Accueil', menu_bookmarks: 'À propos des sites enregistrés', menu_history: 'Historique et onglets',
       menu_about: 'À propos de cet outil', menu_twitter: 'Twitter officiel', menu_account: 'Paramètres du compte',
+      menu_contact: 'Contact / Suggestions',
       search_placeholder: 'Rechercher ou saisir une URL', search_button: 'Rechercher',
       news_label: 'Dernières actualités', news_title: 'Voir les dernières actualités sur Twitter →',
       profile_title: 'Paramètres du profil', profile_placeholder: 'Entrez un nom affiché', profile_save: 'Enregistrer',
@@ -404,7 +456,13 @@
       history_info: 'Appuyez sur Ctrl+H pour l\'historique (fonction native de Chrome)\nAppuyez sur Ctrl+T pour un nouvel onglet',
       add_site_name: 'Entrez le nom du site (ex: Google)',
       add_site_url: 'Entrez une URL (ex: https://google.com)',
-      confirm_remove: 'Supprimer ce site ?', add_tile: 'Ajouter'
+      confirm_remove: 'Supprimer ce site ?', add_tile: 'Ajouter',
+      contact_title: 'Contact / Suggestions', contact_type_contact: '💬 Contact', contact_type_feature: '💡 Suggestion de fonctionnalité',
+      contact_subject_placeholder: 'Titre (ex: Impossible de se connecter)',
+      contact_body_placeholder: 'Merci de décrire les détails',
+      contact_submit: 'Envoyer via GitHub',
+      contact_note: 'Cela ouvrira un formulaire d\'Issue GitHub. Un compte GitHub est requis pour l\'envoyer. Votre message sera visible publiquement par le développeur.',
+      contact_need_input: 'Merci de saisir un titre et une description'
     }
   };
 
@@ -539,6 +597,36 @@
     const name = localStorage.getItem('suiramu_name');
     if(name) document.getElementById('accountIcon').textContent = name[0].toUpperCase();
   })();
+
+  // ==== お問い合わせ・要望（GitHub Issue経由。独自サーバーには送信しない） ====
+  function openContactModal(){
+    document.getElementById('contactModalBg').classList.add('show');
+  }
+  function closeContactModal(){
+    document.getElementById('contactModalBg').classList.remove('show');
+  }
+  function submitContact(){
+    const type = document.getElementById('contactType').value; // 'contact' or 'feature'
+    const subject = document.getElementById('contactSubject').value.trim();
+    const body = document.getElementById('contactBody').value.trim();
+
+    if(!subject || !body){
+      alert(t('contact_need_input'));
+      return;
+    }
+
+    const prefix = type === 'feature' ? '[要望] ' : '[お問い合わせ] ';
+    const label = type === 'feature' ? 'enhancement' : 'contact';
+    const title = encodeURIComponent(prefix + subject);
+    const issueBody = encodeURIComponent(body);
+
+    const url = `https://github.com/godrenkon/page/issues/new?title=${title}&body=${issueBody}&labels=${label}`;
+    window.open(url, '_blank');
+
+    document.getElementById('contactSubject').value = '';
+    document.getElementById('contactBody').value = '';
+    closeContactModal();
+  }
 </script>
 
 </body>
