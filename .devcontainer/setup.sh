@@ -17,34 +17,79 @@ sudo apt-get install -y -qq \
   net-tools \
   supervisor \
   pulseaudio \
-  ffmpeg
+  ffmpeg \
+  ca-certificates \
+  libnss3 \
+  libatk1.0-0 \
+  libatk-bridge2.0-0 \
+  libcups2 \
+  libdrm2 \
+  libxkbcommon0 \
+  libxcomposite1 \
+  libxdamage1 \
+  libxfixes3 \
+  libxrandr2 \
+  libgbm1 \
+  libasound2t64 \
+  libpango-1.0-0 \
+  libpangocairo-1.0-0 \
+  libatspi2.0-0 \
+  libgtk-3-0t64 \
+  > /dev/null 2>&1 || sudo apt-get install -y -qq \
+  xvfb \
+  x11vnc \
+  fluxbox \
+  fonts-noto-cjk \
+  git \
+  wget \
+  net-tools \
+  supervisor \
+  pulseaudio \
+  ffmpeg \
+  ca-certificates \
+  libnss3 \
+  libatk1.0-0 \
+  libatk-bridge2.0-0 \
+  libcups2 \
+  libdrm2 \
+  libxkbcommon0 \
+  libxcomposite1 \
+  libxdamage1 \
+  libxfixes3 \
+  libxrandr2 \
+  libgbm1 \
+  libasound2 \
+  libpango-1.0-0 \
+  libpangocairo-1.0-0 \
+  libatspi2.0-0 \
+  libgtk-3-0 \
+  > /dev/null 2>&1
 
 echo "✅ 基本パッケージ完了"
 
 # ==== Chromium本体のインストール ====
-# Ubuntu 22.04の "chromium-browser" は snap 経由のラッパーで、
-# Codespace(コンテナ環境, snapdなし)では正しくインストールできないことがある。
-# そのため、実体を含む "chromium" パッケージを優先し、失敗したら明確にエラー表示する。
-echo "📦 Chromium 本体をインストール中..."
-if sudo apt-get install -y -qq chromium; then
-  CHROME_BIN="chromium"
-elif sudo apt-get install -y -qq chromium-browser; then
-  CHROME_BIN="chromium-browser"
-else
-  echo "❌ Chromiumのインストールに失敗しました。セットアップを中断します。"
+# Ubuntu の "chromium" / "chromium-browser" apt パッケージは、
+# バージョンによっては実体を持たない snap 転送ラッパーになっており、
+# Codespace(コンテナ環境, snapd なし)では実行できないことがある。
+# そのため、Puppeteer 経由で snap に依存しない Chromium 本体を確実に取得する。
+echo "📦 Node.js パッケージをインストール中..."
+npm install --silent
+
+echo "📦 Chromium 本体を取得中（Puppeteer経由・snap不要）..."
+if [ ! -d "node_modules/puppeteer" ]; then
+  npm install puppeteer --silent
+fi
+
+# Puppeteerがダウンロードした実際のChromium実行ファイルのパスを取得
+CHROME_PATH=$(node -e "console.log(require('puppeteer').executablePath())" 2>/dev/null || echo "")
+
+if [ -z "$CHROME_PATH" ] || [ ! -f "$CHROME_PATH" ]; then
+  echo "❌ Chromiumの取得に失敗しました。セットアップを中断します。"
   exit 1
 fi
 
-# 実際に使えるコマンド名を確認して記録しておく（起動スクリプト側で参照する）
-if command -v chromium-browser > /dev/null 2>&1; then
-  echo "chromium-browser" > /tmp/suiramu-chrome-bin
-elif command -v chromium > /dev/null 2>&1; then
-  echo "chromium" > /tmp/suiramu-chrome-bin
-else
-  echo "❌ Chromiumの実行ファイルが見つかりません。セットアップを中断します。"
-  exit 1
-fi
-echo "✅ Chromium 本体: $(cat /tmp/suiramu-chrome-bin)"
+echo "$CHROME_PATH" > /tmp/suiramu-chrome-bin
+echo "✅ Chromium 本体: $CHROME_PATH"
 
 echo "📥 noVNC をダウンロード中..."
 if [ ! -d "/opt/novnc" ]; then
@@ -52,9 +97,6 @@ if [ ! -d "/opt/novnc" ]; then
   sudo git clone --depth 1 https://github.com/novnc/websockify /opt/novnc/utils/websockify > /dev/null 2>&1
 fi
 echo "✅ noVNC 完了"
-
-echo "📦 Node.js パッケージをインストール中..."
-npm install --silent
 
 echo ""
 echo "🎉 セットアップ完了！"
