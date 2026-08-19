@@ -1,0 +1,274 @@
+name: Archive Website
+
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'Website URL to archive'
+        required: true
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Extract URL from Issue
+        id: extract
+        run: |
+          if [[ "${{ github.event_name }}" == "issues" ]]; then
+            # Issue body から URL を抽出
+            URL=$(echo "${{ github.event.issue.body }}" | grep -oP "(?<=URL:\s).*" | head -1 | xargs)
+          else
+            # workflow_dispatch から取得
+            URL="${{ github.event.inputs.url }}"
+          fi
+          
+          if [ -z "$URL" ]; then
+            echo "❌ URL が見つかりません"
+            exit 1
+          fi
+          
+          echo "url=$URL" >> $GITHUB_OUTPUT
+          echo "✅ URL: $URL"
+
+      - name: Install dependencies
+        run: |
+          npm install puppeteer cheerio fs-extra
+
+      - name: Create archive script
+        run: |
+          cat > archive.js << 'SCRIPT'
+          const puppeteer = require('puppeteer');
+          const cheerio = require('cheerio');
+          const fs = require('fs-extra');
+          const path = require('path');
+          const url = process.argv[2];
+
+          (async () => {
+            console.log(`🔄 Archiving: ${url}`);
+            
+            const browser = await puppeteer.launch({ headless: 'new' });
+            const page = await browser.newPage();
+            
+            try {
+              await page.goto(url, { 
+                waitUntil: 'networkidle2',
+                timeout: 30000 
+              });
+
+              // ドメイン名でフォルダ作成
+              const urlObj = new URL(url);
+              const domain = urlObj.hostname.replace(/^www\./, '');
+              const outputDir = path.join('archived-sites', domain);
+              
+              await fs.ensureDir(outputDir);
+
+              // HTML を取得
+              let html = await page.content();
+
+              // 相対パスを修正（重要）
+              html = html.replace(/href="\/(?!\/)/g, `href="${urlObj.protocol}//${urlObj.host}/`);
+              html = html.replace(/src="\/(?!\/)/g, `src="${urlObj.protocol}//${urlObj.host}/`);
+
+              // index.html に保存
+              await fs.writeFile(path.join(outputDir, 'index.html'), html);
+              
+              // メタデータ保存
+              const metadata = {
+                originalUrl: url,
+                archivedAt: new Date().toISOString(),
+                domain: domain,
+                title: await page.title()
+              };
+              await fs.writeFile(
+                path.join(outputDir, 'metadata.json'),
+                JSON.stringify(metadata, null, 2)
+              );
+
+              console.log(`✅ Archived to: ${outputDir}/`);
+              console.log(`📄 Title: ${metadata.title}`);
+
+            } catch (error) {
+              console.error(`❌ Error: ${error.message}`);
+              process.exit(1);
+            } finally {
+              await browser.close();
+            }
+          })();
+          SCRIPT
+
+      - name: Run archive
+        run: node archive.js "${{ steps.extract.outputs.url }}"
+
+      - name: Create README for archived site
+        run: |
+          DOMAIN=$(echo "${{ steps.extract.outputs.url }}" | sed -E 's|https?://||; s|/.*||; s|^www\.||')
+          OUTPUT_DIR="archived-sites/$DOMAIN"
+          
+          cat > "${OUTPUT_DIR}/README.md" << 'README'
+          # Archived Site
+
+          このサイトは [page](https://github.com/godrenkon/page) によってアーカイブされました。
+
+          ## ℹ️ 情報
+          - **元のURL**: 上記を参照
+          - **アーカイブ日**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          - **ツール**: page (GitHub Actions + Puppeteer)
+
+          ## 📝 使い方
+          1. `index.html` をブラウザで開く
+          2. すべてのリンクと機能が動作します
+          3. オフライン環境でも利用可能
+
+          ## ⚠️ ライセンス
+          オリジナルコンテンツの著作権は元のサイト所有者に帰属します。
+          教育目的での利用に限定してください。
+
+          ---
+          Made with [page](https://github.com/godrenkon/page)
+          README
+          
+          # メタデータから実際の日時を使用
+          if [ -f "${OUTPUT_DIR}/metadata.json" ]; then
+            ARCHIVED_AT=$(jq -r '.archivedAt' "${OUTPUT_DIR}/metadata.json")
+            sed -i "s|日時の部分|${ARCHIVED_AT}|g" "${OUTPUT_DIR}/README.md"
+          fi
+
+      - name: Generate site list
+        run: |
+          cat > archived-sites/index.html << 'INDEXHTML'
+          <!DOCTYPE html>
+          <html lang="ja">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Archived Sites</title>
+            <style>
+              body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                max-width: 1000px;
+                margin: 0 auto;
+                padding: 40px 20px;
+                background: #f5f5f5;
+              }
+              h1 { color: #667eea; }
+              .site-list {
+                display: grid;
+                gap: 15px;
+              }
+              .site-card {
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                transition: transform 0.2s;
+              }
+              .site-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+              }
+              .site-card a {
+                color: #667eea;
+                text-decoration: none;
+                font-weight: 600;
+              }
+              .site-card a:hover {
+                text-decoration: underline;
+              }
+              .meta { color: #666; font-size: 14px; }
+            </style>
+          </head>
+          <body>
+            <h1>📚 Archived Sites</h1>
+            <div class="site-list" id="siteList"></div>
+            <script>
+              const sites = %SITES_JSON%;
+              const list = document.getElementById('siteList');
+              if (sites.length === 0) {
+                list.innerHTML = '<p>まだサイトがアーカイブされていません。</p>';
+              } else {
+                sites.forEach(site => {
+                  const card = document.createElement('div');
+                  card.className = 'site-card';
+                  card.innerHTML = `
+                    <a href="${site.path}/">${site.title || site.domain}</a>
+                    <div class="meta">
+                      📅 ${new Date(site.archived).toLocaleString('ja-JP')}
+                    </div>
+                  `;
+                  list.appendChild(card);
+                });
+              }
+            </script>
+          </body>
+          </html>
+          INDEXHTML
+
+      - name: Generate sites JSON
+        run: |
+          node << 'JSONGEN'
+          const fs = require('fs');
+          const path = require('path');
+
+          const archivedDir = 'archived-sites';
+          const sites = [];
+
+          if (fs.existsSync(archivedDir)) {
+            const dirs = fs.readdirSync(archivedDir).filter(f => {
+              const fullPath = path.join(archivedDir, f);
+              return fs.statSync(fullPath).isDirectory();
+            });
+
+            dirs.forEach(domain => {
+              const metaFile = path.join(archivedDir, domain, 'metadata.json');
+              if (fs.existsSync(metaFile)) {
+                const meta = JSON.parse(fs.readFileSync(metaFile, 'utf8'));
+                sites.push({
+                  domain: meta.domain,
+                  title: meta.title,
+                  archived: meta.archivedAt,
+                  path: domain
+                });
+              }
+            });
+          }
+
+          const indexHtml = fs.readFileSync(path.join(archivedDir, 'index.html'), 'utf8');
+          const updated = indexHtml.replace('%SITES_JSON%', JSON.stringify(sites));
+          fs.writeFileSync(path.join(archivedDir, 'index.html'), updated);
+
+          console.log(`✅ Generated index for ${sites.length} sites`);
+          JSONGEN
+
+      - name: Commit and push
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add archived-sites/
+          git commit -m "Archive: ${{ steps.extract.outputs.url }}" || echo "No changes"
+          git push
+
+      - name: Comment on Issue
+        if: github.event_name == 'issues'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const domain = "${{ steps.extract.outputs.url }}".replace(/https?:\/\//, '').replace(/\/.*/, '').replace(/^www\./, '');
+            const url = `https://godrenkon.github.io/page/archived-sites/${domain}/`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `✅ アーカイブ完了！\n\n📄 **アーカイブ済みサイト**: [こちら](${url})\n\n制限されたネットワークからもアクセス可能です！`
+            });
