@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" id="htmlRoot">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,14 +7,13 @@
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', 'Noto Sans SC', 'Noto Sans KR', sans-serif;
     background: #f5f6f8;
     color: #222;
     height: 100vh;
     overflow: hidden;
   }
 
-  /* ==== 上部バー ==== */
   .topbar {
     height: 60px;
     display: flex;
@@ -52,6 +51,16 @@
     transform: translateX(-50%);
   }
 
+  .lang-select {
+    padding: 6px 10px;
+    border: 1px solid #e0e0e5;
+    border-radius: 8px;
+    background: white;
+    font-size: 13px;
+    cursor: pointer;
+    color: #444;
+  }
+
   .account {
     width: 38px; height: 38px;
     border-radius: 50%;
@@ -63,7 +72,6 @@
     font-size: 15px;
   }
 
-  /* ==== サイドメニュー ==== */
   .sidebar {
     position: fixed;
     top: 0; left: -280px;
@@ -91,7 +99,6 @@
   }
   .overlay.show { display: block; }
 
-  /* ==== メインエリア ==== */
   .main {
     height: calc(100vh - 60px);
     display: flex;
@@ -151,7 +158,6 @@
   }
   .search-go:hover { background: #5153d1; }
 
-  /* ==== 保存サイト（chrome風） ==== */
   .saved-sites {
     width: 90%;
     max-width: 700px;
@@ -182,7 +188,6 @@
 
   .add-site .site-icon { color: #aaa; border-style: dashed; }
 
-  /* ==== お知らせカード ==== */
   .news-card {
     width: 90%;
     max-width: 700px;
@@ -216,7 +221,6 @@
   }
   .news-title { font-size: 14px; font-weight: 600; color: #222; }
 
-  /* ==== アカウントモーダル ==== */
   .modal-bg {
     display: none;
     position: fixed; inset: 0;
@@ -269,18 +273,26 @@
     </div>
     <div class="logo">Suiramu</div>
     <div class="topbar-right">
+      <select class="lang-select" id="langSelect" onchange="setLang(this.value)">
+        <option value="ja">🇯🇵 日本語</option>
+        <option value="en">🇺🇸 English</option>
+        <option value="zh">🇨🇳 中文</option>
+        <option value="ko">🇰🇷 한국어</option>
+        <option value="es">🇪🇸 Español</option>
+        <option value="fr">🇫🇷 Français</option>
+      </select>
       <div class="account" id="accountIcon" onclick="toggleAccountModal()">?</div>
     </div>
   </div>
 
   <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
   <div class="sidebar" id="sidebar">
-    <div class="sidebar-item" onclick="location.href='index.html'">🏠 ホーム</div>
-    <div class="sidebar-item" onclick="alert('保存サイトはホーム画面のタイルから開けます。\n右クリックで削除できます。\n\nChrome標準のブックマーク(★マーク)も使えます。')">⭐ 保存サイトについて</div>
-    <div class="sidebar-item" onclick="alert('閲覧履歴は Ctrl+H で見れます（Chrome標準機能）\n新しいタブは Ctrl+T です')">🕘 履歴・タブの使い方</div>
-    <div class="sidebar-item" onclick="window.open('https://github.com/godrenkon/page','_blank')">📄 このツールについて</div>
-    <div class="sidebar-item" onclick="window.open('https://x.com/Riku_verse_','_blank')">🐦 公式Twitter</div>
-    <div class="sidebar-item" onclick="toggleAccountModal()">👤 アカウント設定</div>
+    <div class="sidebar-item" onclick="location.href='index.html'">🏠 <span data-i18n="menu_home"></span></div>
+    <div class="sidebar-item" onclick="showAlert('bookmarks_info')">⭐ <span data-i18n="menu_bookmarks"></span></div>
+    <div class="sidebar-item" onclick="showAlert('history_info')">🕘 <span data-i18n="menu_history"></span></div>
+    <div class="sidebar-item" onclick="window.open('https://github.com/godrenkon/page','_blank')">📄 <span data-i18n="menu_about"></span></div>
+    <div class="sidebar-item" onclick="window.open('https://x.com/Riku_verse_','_blank')">🐦 <span data-i18n="menu_twitter"></span></div>
+    <div class="sidebar-item" onclick="toggleAccountModal()">👤 <span data-i18n="menu_account"></span></div>
   </div>
 
   <div class="main">
@@ -289,8 +301,8 @@
     <div class="search-wrap">
       <div class="search-box">
         <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" placeholder="検索、またはURLを入力" autofocus>
-        <button class="search-go" onclick="doSearch()">検索</button>
+        <input type="text" id="searchInput" data-i18n-placeholder="search_placeholder" autofocus>
+        <button class="search-go" onclick="doSearch()" data-i18n="search_button"></button>
       </div>
     </div>
 
@@ -299,32 +311,138 @@
     <div class="news-card" onclick="window.open('https://x.com/Riku_verse_','_blank')">
       <div class="news-image">📢</div>
       <div class="news-text">
-        <div class="news-label">最新のお知らせ</div>
-        <div class="news-title">公式Twitterで最新情報をチェック →</div>
+        <div class="news-label" data-i18n="news_label"></div>
+        <div class="news-title" data-i18n="news_title"></div>
       </div>
     </div>
   </div>
 
-  <!-- アカウントモーダル（※サーバー送信なし・端末内のみ保存） -->
   <div class="modal-bg" id="modalBg" onclick="if(event.target===this) toggleAccountModal()">
     <div class="modal">
-      <h3>プロフィール設定</h3>
-      <input type="text" id="nameInput" placeholder="表示名を入力">
-      <button onclick="saveProfile()">保存する</button>
-      <p class="note">
-        この情報はこのCodespace内だけに保存され、外部サーバーには一切送信されません。
-      </p>
+      <h3 data-i18n="profile_title"></h3>
+      <input type="text" id="nameInput" data-i18n-placeholder="profile_placeholder">
+      <button onclick="saveProfile()" data-i18n="profile_save"></button>
+      <p class="note" data-i18n="profile_note"></p>
     </div>
   </div>
 
 <script>
-  // ==== サイドメニュー ====
+  const I18N = {
+    ja: {
+      menu_home: 'ホーム', menu_bookmarks: '保存サイトについて', menu_history: '履歴・タブの使い方',
+      menu_about: 'このツールについて', menu_twitter: '公式Twitter', menu_account: 'アカウント設定',
+      search_placeholder: '検索、またはURLを入力', search_button: '検索',
+      news_label: '最新のお知らせ', news_title: '公式Twitterで最新情報をチェック →',
+      profile_title: 'プロフィール設定', profile_placeholder: '表示名を入力', profile_save: '保存する',
+      profile_note: 'この情報はこのCodespace内だけに保存され、外部サーバーには一切送信されません。',
+      bookmarks_info: '保存サイトはホーム画面のタイルから開けます。\n右クリックで削除できます。\n\nChrome標準のブックマーク(★マーク)も使えます。',
+      history_info: '閲覧履歴は Ctrl+H で見れます（Chrome標準機能）\n新しいタブは Ctrl+T です',
+      add_site_name: 'サイト名を入力してください（例: Google）',
+      add_site_url: 'URLを入力してください（例: https://google.com）',
+      confirm_remove: 'このサイトを削除しますか？', add_tile: '追加'
+    },
+    en: {
+      menu_home: 'Home', menu_bookmarks: 'About saved sites', menu_history: 'History & tabs',
+      menu_about: 'About this tool', menu_twitter: 'Official Twitter', menu_account: 'Account settings',
+      search_placeholder: 'Search or enter a URL', search_button: 'Search',
+      news_label: 'Latest news', news_title: 'Check the latest updates on Twitter →',
+      profile_title: 'Profile settings', profile_placeholder: 'Enter a display name', profile_save: 'Save',
+      profile_note: 'This is only stored inside this Codespace and is never sent to an external server.',
+      bookmarks_info: 'Open saved sites from the tiles on the home screen.\nRight-click to remove one.\n\nYou can also use Chrome\'s built-in bookmarks (★).',
+      history_info: 'Press Ctrl+H for browsing history (built into Chrome)\nPress Ctrl+T for a new tab',
+      add_site_name: 'Enter a site name (e.g. Google)',
+      add_site_url: 'Enter a URL (e.g. https://google.com)',
+      confirm_remove: 'Remove this site?', add_tile: 'Add'
+    },
+    zh: {
+      menu_home: '主页', menu_bookmarks: '关于保存的网站', menu_history: '历史记录与标签页',
+      menu_about: '关于此工具', menu_twitter: '官方推特', menu_account: '账户设置',
+      search_placeholder: '搜索或输入网址', search_button: '搜索',
+      news_label: '最新公告', news_title: '在官方推特查看最新消息 →',
+      profile_title: '个人资料设置', profile_placeholder: '输入显示名称', profile_save: '保存',
+      profile_note: '此信息仅保存在此 Codespace 内，绝不会发送到外部服务器。',
+      bookmarks_info: '可从主页的图标打开保存的网站。\n右键点击可删除。\n\n也可以使用 Chrome 自带的书签功能（★）。',
+      history_info: '按 Ctrl+H 查看浏览历史（Chrome 自带功能）\n按 Ctrl+T 打开新标签页',
+      add_site_name: '请输入网站名称（例如：Google）',
+      add_site_url: '请输入网址（例如：https://google.com）',
+      confirm_remove: '要删除此网站吗？', add_tile: '添加'
+    },
+    ko: {
+      menu_home: '홈', menu_bookmarks: '저장된 사이트 안내', menu_history: '기록 및 탭 사용법',
+      menu_about: '이 도구에 대해', menu_twitter: '공식 트위터', menu_account: '계정 설정',
+      search_placeholder: '검색어 또는 URL 입력', search_button: '검색',
+      news_label: '최신 소식', news_title: '공식 트위터에서 최신 소식 확인하기 →',
+      profile_title: '프로필 설정', profile_placeholder: '표시 이름 입력', profile_save: '저장',
+      profile_note: '이 정보는 이 Codespace 안에만 저장되며 외부 서버로 전송되지 않습니다.',
+      bookmarks_info: '저장된 사이트는 홈 화면 타일에서 열 수 있습니다.\n우클릭하면 삭제할 수 있습니다.\n\nChrome 기본 북마크(★)도 사용할 수 있습니다.',
+      history_info: 'Ctrl+H로 방문 기록을 볼 수 있습니다 (Chrome 기본 기능)\nCtrl+T로 새 탭을 열 수 있습니다',
+      add_site_name: '사이트 이름을 입력하세요 (예: Google)',
+      add_site_url: 'URL을 입력하세요 (예: https://google.com)',
+      confirm_remove: '이 사이트를 삭제하시겠습니까?', add_tile: '추가'
+    },
+    es: {
+      menu_home: 'Inicio', menu_bookmarks: 'Sobre sitios guardados', menu_history: 'Historial y pestañas',
+      menu_about: 'Acerca de esta herramienta', menu_twitter: 'Twitter oficial', menu_account: 'Configuración de cuenta',
+      search_placeholder: 'Buscar o escribir una URL', search_button: 'Buscar',
+      news_label: 'Últimas noticias', news_title: 'Consulta las últimas novedades en Twitter →',
+      profile_title: 'Configuración de perfil', profile_placeholder: 'Introduce un nombre para mostrar', profile_save: 'Guardar',
+      profile_note: 'Esta información solo se guarda dentro de este Codespace y nunca se envía a un servidor externo.',
+      bookmarks_info: 'Abre los sitios guardados desde los iconos de la pantalla de inicio.\nClic derecho para eliminar uno.\n\nTambién puedes usar los marcadores nativos de Chrome (★).',
+      history_info: 'Presiona Ctrl+H para ver el historial (función nativa de Chrome)\nPresiona Ctrl+T para una nueva pestaña',
+      add_site_name: 'Introduce el nombre del sitio (ej: Google)',
+      add_site_url: 'Introduce una URL (ej: https://google.com)',
+      confirm_remove: '¿Eliminar este sitio?', add_tile: 'Añadir'
+    },
+    fr: {
+      menu_home: 'Accueil', menu_bookmarks: 'À propos des sites enregistrés', menu_history: 'Historique et onglets',
+      menu_about: 'À propos de cet outil', menu_twitter: 'Twitter officiel', menu_account: 'Paramètres du compte',
+      search_placeholder: 'Rechercher ou saisir une URL', search_button: 'Rechercher',
+      news_label: 'Dernières actualités', news_title: 'Voir les dernières actualités sur Twitter →',
+      profile_title: 'Paramètres du profil', profile_placeholder: 'Entrez un nom affiché', profile_save: 'Enregistrer',
+      profile_note: 'Cette information est stockée uniquement dans ce Codespace et n\'est jamais envoyée à un serveur externe.',
+      bookmarks_info: 'Ouvrez les sites enregistrés depuis les icônes de la page d\'accueil.\nClic droit pour en supprimer un.\n\nVous pouvez aussi utiliser les favoris natifs de Chrome (★).',
+      history_info: 'Appuyez sur Ctrl+H pour l\'historique (fonction native de Chrome)\nAppuyez sur Ctrl+T pour un nouvel onglet',
+      add_site_name: 'Entrez le nom du site (ex: Google)',
+      add_site_url: 'Entrez une URL (ex: https://google.com)',
+      confirm_remove: 'Supprimer ce site ?', add_tile: 'Ajouter'
+    }
+  };
+
+  function getLang(){
+    return localStorage.getItem('suiramu_lang') || (navigator.language || 'ja').slice(0,2);
+  }
+  function t(key){
+    const lang = getLang();
+    const dict = I18N[lang] || I18N.ja;
+    return dict[key] || I18N.ja[key] || key;
+  }
+  function showAlert(key){ alert(t(key)); }
+  function applyTranslations(){
+    document.querySelectorAll('[data-i18n]').forEach(el=>{
+      el.textContent = t(el.getAttribute('data-i18n'));
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{
+      el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
+    });
+    document.getElementById('htmlRoot').lang = getLang();
+  }
+  function setLang(lang){
+    localStorage.setItem('suiramu_lang', lang);
+    applyTranslations();
+    loadSites();
+  }
+  (function initLang(){
+    const lang = getLang();
+    const sel = document.getElementById('langSelect');
+    if(sel && I18N[lang]) sel.value = lang;
+    applyTranslations();
+  })();
+
   function toggleSidebar(){
     document.getElementById('sidebar').classList.toggle('open');
     document.getElementById('overlay').classList.toggle('show');
   }
 
-  // ==== 検索 ====
   function doSearch(){
     const q = document.getElementById('searchInput').value.trim();
     if(!q) return;
@@ -342,9 +460,6 @@
     if(e.key==='Enter') doSearch();
   });
 
-  // ==== 保存サイト（GitHubプライベートリポジトリと同期・chrome風タイル） ====
-  // データは .devcontainer/server.js が提供するローカルAPI(127.0.0.1:7070)経由で
-  // あなた専用のプライベートリポジトリ(suiramu-data)に自動保存されます
   const API = 'http://127.0.0.1:7070';
   const DEFAULT_SITES = [
     {name:'GitHub', url:'https://github.com', icon:'🐙'},
@@ -358,11 +473,9 @@
       const data = await res.json();
       return (data && data.length) ? data : DEFAULT_SITES;
     }catch(e){
-      // データサーバーが未起動などの場合は、端末内の一時保存にフォールバック
       return JSON.parse(localStorage.getItem('suiramu_sites_fallback') || 'null') || DEFAULT_SITES;
     }
   }
-
   async function saveSites(sites){
     try{
       await fetch(API + '/bookmarks', {
@@ -374,7 +487,6 @@
       localStorage.setItem('suiramu_sites_fallback', JSON.stringify(sites));
     }
   }
-
   async function loadSites(){
     const saved = await fetchSites();
     const wrap = document.getElementById('savedSites');
@@ -387,34 +499,29 @@
       el.innerHTML = `<div class="site-icon">${site.icon||'🌐'}</div><div class="site-name">${site.name}</div>`;
       wrap.appendChild(el);
     });
-    // 追加ボタン
     const add = document.createElement('div');
     add.className = 'site-tile add-site';
     add.onclick = ()=>addSite(saved);
-    add.innerHTML = `<div class="site-icon">＋</div><div class="site-name">追加</div>`;
+    add.innerHTML = `<div class="site-icon">＋</div><div class="site-name">${t('add_tile')}</div>`;
     wrap.appendChild(add);
   }
-
   async function addSite(current){
-    const name = prompt('サイト名を入力してください（例: Google）');
+    const name = prompt(t('add_site_name'));
     if(!name) return;
-    const url = prompt('URLを入力してください（例: https://google.com）');
+    const url = prompt(t('add_site_url'));
     if(!url) return;
     current.push({name, url, icon:'🌐'});
     await saveSites(current);
     loadSites();
   }
-
   async function removeSite(idx, current){
-    if(!confirm('このサイトを削除しますか？')) return;
+    if(!confirm(t('confirm_remove'))) return;
     current.splice(idx,1);
     await saveSites(current);
     loadSites();
   }
-
   loadSites();
 
-  // ==== アカウント（ローカルのみ・プロフィール名程度） ====
   function toggleAccountModal(){
     document.getElementById('modalBg').classList.toggle('show');
     const name = localStorage.getItem('suiramu_name');
