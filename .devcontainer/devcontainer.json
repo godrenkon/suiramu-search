@@ -10,7 +10,7 @@
   "portsAttributes": {
     "6080": {
       "label": "🌐 Suiramu 画面 (noVNC)",
-      "onAutoForward": "openBrowser",
+      "onAutoForward": "notify",
       "protocol": "http"
     },
     "5900": {
