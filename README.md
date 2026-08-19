@@ -122,8 +122,6 @@ npm run video      ← 動画モードを起動
 
 直接投稿したい方は [こちら](https://github.com/godrenkon/suiramu-search/issues/new/choose) からどうぞ。
 
-気軽な質問は公式Twitter（[@Riku_verse_](https://x.com/Riku_verse_)）でも歓迎です。
-
 ---
 
 ## 🔒 プライバシーについて
