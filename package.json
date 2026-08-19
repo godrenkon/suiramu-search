@@ -1,9 +1,11 @@
 {
-  "name": "suiramu-browser",
-  "version": "2.0.0",
-  "description": "Codespace上で動く、あなた専用のリモートブラウザ環境",
+  "name": "suiramu",
+  "version": "3.0.0",
+  "description": "超検索特化・超動画特化のリモートブラウザ環境（GitHub Codespace上で動作）",
   "scripts": {
-    "start": "bash .devcontainer/start.sh",
+    "search": "bash .devcontainer/start_search.sh",
+    "video": "bash .devcontainer/start_video.sh",
+    "start": "bash .devcontainer/start_search.sh",
     "setup": "bash .devcontainer/setup.sh"
   },
   "license": "MIT"
