@@ -1,25 +1,32 @@
 {
-  "name": "Suiramu Browser",
+  "name": "Suiramu",
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
       "version": "20"
     }
   },
-  "forwardPorts": [6080, 5900],
+  "forwardPorts": [6080, 5900, 7070, 7071],
   "portsAttributes": {
     "6080": {
-      "label": "🌐 Browser (noVNC)",
+      "label": "🌐 Suiramu 画面 (noVNC)",
       "onAutoForward": "openBrowser",
       "protocol": "http"
     },
     "5900": {
       "label": "VNC Raw",
       "onAutoForward": "silent"
+    },
+    "7070": {
+      "label": "データ保存API",
+      "onAutoForward": "silent"
+    },
+    "7071": {
+      "label": "🔊 音声ストリーム（動画モード時のみ）",
+      "onAutoForward": "silent"
     }
   },
   "postCreateCommand": "bash .devcontainer/setup.sh",
-  "postStartCommand": "bash .devcontainer/start.sh",
   "customizations": {
     "codespaces": {
       "openFiles": ["README.md"]
