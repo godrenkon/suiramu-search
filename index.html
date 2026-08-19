@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>page - 制限されたネットワークでも世界中のサイトにアクセス</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #333;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 40px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        nav a {
+            margin-left: 30px;
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #667eea;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 40px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .hero {
+            color: white;
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .hero h1 {
+            font-size: 56px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero p {
+            font-size: 24px;
+            margin-bottom: 40px;
+            opacity: 0.95;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            padding: 16px 40px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 80px;
+        }
+
+        .feature {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+
+        .feature p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .github-badge {
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        .github-badge a {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #333;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .github-badge a:hover {
+            background: #555;
+        }
+
+        footer {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            text-align: center;
+            border-top: 1px solid #ddd;
+            margin-top: 80px;
+        }
+
+        .social-links {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-decoration: none;
+            font-size: 24px;
+            transition: background 0.3s;
+        }
+
+        .social-links a:hover {
+            background: #764ba2;
+        }
+
+        .input-section {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            margin-top: 40px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group button {
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .input-group button:hover {
+            background: #764ba2;
+        }
+
+        .info-text {
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            nav {
+                display: flex;
+                gap: 20px;
+                width: 100%;
+                justify-content: center;
+            }
+
+            nav a {
+                margin-left: 0;
+            }
+
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .hero p {
+                font-size: 18px;
+            }
+
+            .container {
+                padding: 30px 20px;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">📄 page</div>
+            <nav>
+                <a href="#features">機能</a>
+                <a href="#usage">使い方</a>
+                <a href="https://github.com/godrenkon/page" target="_blank">GitHub</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="hero">
+            <h1>🌍 制限されたネットワークでも<br>世界中のサイトにアクセス</h1>
+            <p>学生向け。URL を入力するだけで、<br>どの環境でもサイトを閲覧・操作できます</p>
+            <a href="#usage" class="cta-button">今すぐ試す</a>
+        </div>
+
+        <div id="features" class="features">
+            <div class="feature">
+                <div class="icon">🚀</div>
+                <h3>超高速スクレイピング</h3>
+                <p>GitHub Actions が Puppeteer を使って瞬時にサイトをキャプチャ。完全なレンダリング版を生成します。</p>
+            </div>
+            <div class="feature">
+                <div class="icon">🔒</div>
+                <h3>セキュアで安全</h3>
+                <p>スクレイピング処理は全て GitHub 側で実行。あなたの端末には通信ログが残りません。</p>
+            </div>
+            <div class="feature">
+                <div class="icon">⚡</div>
+                <h3>完全オフライン対応</h3>
+                <p>生成されたサイトは GitHub Pages で公開。どんな制限ネットワークからでもアクセス可能。</p>
+            </div>
+            <div class="feature">
+                <div class="icon">📦</div>
+                <h3>Zip ダウンロード対応</h3>
+                <p>Codespaces や ローカル環境で利用可能。完全なオフライン環境で開発できます。</p>
+            </div>
+            <div class="feature">
+                <div class="icon">🌐</div>
+                <h3>複数言語対応</h3>
+                <p>世界中のサイトに対応。言語や地域による制限も回避できます。</p>
+            </div>
+            <div class="feature">
+                <div class="icon">💡</div>
+                <h3>学生向けに設計</h3>
+                <p>教育目的での利用を想定。複雑な設定なしで誰でも使えます。</p>
+            </div>
+        </div>
+
+        <div class="input-section">
+            <h2 id="usage">✨ 今すぐ使ってみる</h2>
+            <div class="input-group">
+                <input type="url" id="urlInput" placeholder="https://example.com を入力してください..." value="">
+                <button onclick="archiveUrl()">アーカイブ</button>
+            </div>
+            <p class="info-text">
+                💡 ヒント: 
+                <br>• 現在は手動で GitHub に Issue を作成して URL を入力してください
+                <br>• GitHub Actions が自動実行され、数分後に archived-sites/ に公開サイトが追加されます
+                <br>• 生成されたリンクを共有すれば、世界中の人がアクセスできます
+            </p>
+        </div>
+    </div>
+
+    <footer>
+        <h3>page - 世界の学生のために</h3>
+        <p>制限されたネットワークを突破。自由なアクセスを実現。</p>
+        
+        <div class="social-links">
+            <a href="https://x.com/Riku_verse_" target="_blank" title="Twitter">𝕏</a>
+            <a href="https://github.com/godrenkon/page" target="_blank" title="GitHub">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v 3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+            </a>
+        </div>
+
+        <p style="margin-top: 30px; color: #999;">
+            © 2026 page. Made with ❤️ for students worldwide.
+        </p>
+    </footer>
+
+    <script>
+        function archiveUrl() {
+            const url = document.getElementById('urlInput').value;
+            if (!url) {
+                alert('URL を入力してください');
+                return;
+            }
+            
+            // GitHub Issue を作成する意図を示す
+            const issueUrl = `https://github.com/godrenkon/page/issues/new?title=Archive%20Request&body=URL:%20${encodeURIComponent(url)}&labels=archive-request`;
+            window.open(issueUrl, '_blank');
+        }
+
+        // Enter キーで送信
+        document.getElementById('urlInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                archiveUrl();
+            }
+        });
+    </script>
+</body>
+</html>
