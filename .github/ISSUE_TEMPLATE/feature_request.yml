@@ -1,0 +1,19 @@
+name: 💡 ご要望 / Feature Request
+description: こんな機能が欲しい、こう変えてほしい、などのアイデア
+title: "[要望] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: content
+    attributes:
+      label: どんな機能・変更を希望しますか？
+      placeholder: 例）ダークモードが欲しい、対応言語を増やしてほしい、など
+    validations:
+      required: true
+  - type: textarea
+    id: reason
+    attributes:
+      label: 理由・使いたい場面（任意）
+      placeholder: なぜそれが欲しいか、どんな時に使いたいかを書いてもらえると助かります
+    validations:
+      required: false
