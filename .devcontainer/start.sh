@@ -8,6 +8,15 @@ pkill x11vnc 2>/dev/null || true
 pkill fluxbox 2>/dev/null || true
 pkill -f websockify 2>/dev/null || true
 pkill -f chromium 2>/dev/null || true
+pkill -f "node .devcontainer/server.js" 2>/dev/null || true
+sleep 1
+
+# 0. ブックマークデータをGitHub(プライベートリポジトリ)と同期
+bash .devcontainer/sync_data.sh
+
+# 0.5 ブックマーク保存用のローカルAPIサーバーを起動
+echo "📡 データサーバー起動中..."
+node .devcontainer/server.js > /tmp/suiramu-server.log 2>&1 &
 sleep 1
 
 # 1. 仮想ディスプレイ起動 (画面番号 :1, 解像度1280x800)
@@ -32,7 +41,13 @@ echo "🌐 noVNC 起動中（ポート6080）..."
 /opt/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 6080 &
 sleep 2
 
-# 5. Chromium をフルスクリーンで起動（最初は検索エンジンのトップページ）
+# 5. Chromium 起動
+#    --user-data-dir を固定ディレクトリにすることで、
+#    タブの状態・閲覧履歴・ブックマークバー等が Codespace 再起動をまたいでも保持される
+#    --restore-last-session で、閉じたときのタブ構成を次回も復元
+CHROME_PROFILE="$HOME/.suiramu-chrome-profile"
+mkdir -p "$CHROME_PROFILE"
+
 echo "🌏 ブラウザ起動中..."
 chromium-browser \
   --no-sandbox \
@@ -43,6 +58,8 @@ chromium-browser \
   --window-size=1280,800 \
   --no-first-run \
   --disable-infobars \
+  --user-data-dir="$CHROME_PROFILE" \
+  --restore-last-session \
   "file://$(pwd)/home/index.html" &
 
 echo ""
@@ -51,7 +68,10 @@ echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "  Codespace の「ポート」タブを開いて"
 echo "  6080番ポートのURLをクリックしてください"
-echo "  （自動でブラウザが開く場合もあります）"
+echo ""
+echo "  💡 Ctrl+T で新しいタブ、Ctrl+H で履歴が見れます"
+echo "  💡 ブックマークはあなた専用のプライベート"
+echo "     リポジトリ(suiramu-data)に自動保存されます"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
