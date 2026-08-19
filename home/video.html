@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suiramu Video</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', sans-serif;
+    background: #111;
+    color: #eee;
+    height: 100vh;
+    overflow: hidden;
+  }
+  .topbar {
+    height: 60px;
+    display: flex; align-items: center; justify-content: center;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+  }
+  .logo {
+    font-size: 22px; font-weight: 800;
+    background: linear-gradient(135deg, #f43f5e, #f97316);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .badge {
+    font-size: 11px;
+    background: #f43f5e;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .main {
+    height: calc(100vh - 60px);
+    display: flex; flex-direction: column; align-items: center;
+    padding-top: 6vh;
+    overflow-y: auto;
+  }
+  .search-wrap { width: 90%; max-width: 600px; margin-bottom: 30px; }
+  .search-box {
+    display: flex; align-items: center;
+    background: #1e1e1e; border: 1px solid #333; border-radius: 999px;
+    padding: 14px 22px;
+  }
+  .search-box input {
+    flex: 1; border: none; outline: none; font-size: 16px;
+    background: transparent; color: #eee;
+  }
+  .search-go {
+    background: #f43f5e; color: white; border: none; border-radius: 999px;
+    padding: 8px 20px; font-weight: 600; cursor: pointer; margin-left: 10px;
+  }
+  .video-sites {
+    width: 90%; max-width: 700px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 16px; margin-bottom: 30px;
+  }
+  .video-tile {
+    background: #1e1e1e;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform .15s, background .15s;
+    border: 1px solid #333;
+  }
+  .video-tile:hover { transform: translateY(-3px); background: #262626; }
+  .video-icon { font-size: 32px; margin-bottom: 8px; }
+  .video-name { font-size: 14px; }
+
+  .audio-panel {
+    width: 90%; max-width: 700px;
+    background: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+  }
+  .audio-panel h3 { font-size: 14px; margin-bottom: 10px; color: #f43f5e; }
+  .audio-panel p { font-size: 13px; color: #999; margin-bottom: 12px; line-height: 1.6; }
+  audio { width: 100%; }
+
+  .tip {
+    width: 90%; max-width: 700px;
+    font-size: 12px;
+    color: #777;
+    line-height: 1.7;
+    padding-bottom: 30px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="logo">Suiramu <span class="badge">VIDEO</span></div>
+  </div>
+
+  <div class="main">
+    <div class="search-wrap">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="動画を検索、またはURLを入力" autofocus>
+        <button class="search-go" onclick="doSearch()">検索</button>
+      </div>
+    </div>
+
+    <div class="video-sites">
+      <div class="video-tile" onclick="location.href='https://youtube.com'">
+        <div class="video-icon">▶️</div><div class="video-name">YouTube</div>
+      </div>
+      <div class="video-tile" onclick="location.href='https://twitch.tv'">
+        <div class="video-icon">🎮</div><div class="video-name">Twitch</div>
+      </div>
+      <div class="video-tile" onclick="location.href='https://nicovideo.jp'">
+        <div class="video-icon">📺</div><div class="video-name">ニコニコ動画</div>
+      </div>
+      <div class="video-tile" onclick="location.href='https://vimeo.com'">
+        <div class="video-icon">🎥</div><div class="video-name">Vimeo</div>
+      </div>
+    </div>
+
+    <div class="audio-panel">
+      <h3>🔊 音声プレーヤー</h3>
+      <p>
+        映像はこの画面（Chromium）に表示されますが、音声は別経路で配信されます。
+        下の再生ボタンを1回押すと、動画の音声が流れるようになります。
+        （ブラウザの自動再生制限のため、最初の1回だけ手動操作が必要です）
+      </p>
+      <audio id="player" controls>
+        <source src="http://127.0.0.1:7071/audio" type="audio/webm">
+      </audio>
+    </div>
+
+    <div class="tip">
+      💡 音が出ない場合: 一度動画サイトで再生ボタンを押してから、上の音声プレーヤーも再生してみてください。<br>
+      💡 映像がカクつく場合: Codespaceのマシンスペックを上げると改善することがあります（Settings → Codespaces → Machine type）。<br>
+      💡 文字を読む作業がメインの日は、ターミナルで Ctrl+C → <code>npm run search</code> がおすすめです。
+    </div>
+  </div>
+
+<script>
+  function doSearch(){
+    const q = document.getElementById('searchInput').value.trim();
+    if(!q) return;
+    let url;
+    if(/^https?:\/\//.test(q)){
+      url = q;
+    } else if(/^[\w-]+\.[a-z]{2,}([\/?].*)?$/i.test(q)){
+      url = 'https://' + q;
+    } else {
+      url = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q);
+    }
+    location.href = url;
+  }
+  document.getElementById('searchInput').addEventListener('keydown', e=>{
+    if(e.key==='Enter') doSearch();
+  });
+</script>
+
+</body>
+</html>
