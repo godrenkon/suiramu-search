@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Suiramu</title>
+<title>Suiramu Search</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
@@ -109,13 +109,14 @@
   }
 
   .logo-big {
-    font-size: 56px;
+    font-size: clamp(32px, 7vw, 56px);
     font-weight: 800;
     background: linear-gradient(135deg, #6366f1, #8b5cf6);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     margin-bottom: 32px;
+    white-space: nowrap;
   }
 
   .search-wrap {
@@ -271,7 +272,7 @@
         <span></span><span></span><span></span>
       </div>
     </div>
-    <div class="logo">Suiramu</div>
+    <div class="logo">Suiramu <span style="font-size:14px; opacity:.6; font-weight:600;">S²</span></div>
     <div class="topbar-right">
       <select class="lang-select" id="langSelect" onchange="setLang(this.value)">
         <option value="ja">🇯🇵 日本語</option>
@@ -291,14 +292,14 @@
     <div class="sidebar-item" onclick="showAlert('video_mode_info')">🎬 <span data-i18n="menu_video_mode"></span></div>
     <div class="sidebar-item" onclick="showAlert('bookmarks_info')">⭐ <span data-i18n="menu_bookmarks"></span></div>
     <div class="sidebar-item" onclick="showAlert('history_info')">🕘 <span data-i18n="menu_history"></span></div>
-    <div class="sidebar-item" onclick="window.open('https://github.com/godrenkon/page','_blank')">📄 <span data-i18n="menu_about"></span></div>
+    <div class="sidebar-item" onclick="window.open('https://github.com/godrenkon/suiramu-search','_blank')">📄 <span data-i18n="menu_about"></span></div>
     <div class="sidebar-item" onclick="openContactModal()">✉️ <span data-i18n="menu_contact"></span></div>
     <div class="sidebar-item" onclick="window.open('https://x.com/Riku_verse_','_blank')">🐦 <span data-i18n="menu_twitter"></span></div>
     <div class="sidebar-item" onclick="toggleAccountModal()">👤 <span data-i18n="menu_account"></span></div>
   </div>
 
   <div class="main">
-    <div class="logo-big">Suiramu</div>
+    <div class="logo-big">Suiramu Search</div>
 
     <div class="search-wrap">
       <select id="engineSelect" class="lang-select" style="margin-bottom:10px;" onchange="localStorage.setItem('suiramu_engine', this.value)">
@@ -653,7 +654,7 @@
     const title = encodeURIComponent(prefix + subject);
     const issueBody = encodeURIComponent(body);
 
-    const url = `https://github.com/godrenkon/page/issues/new?title=${title}&body=${issueBody}&labels=${label}`;
+    const url = `https://github.com/godrenkon/suiramu-search/issues/new?title=${title}&body=${issueBody}&labels=${label}`;
     window.open(url, '_blank');
 
     document.getElementById('contactSubject').value = '';
