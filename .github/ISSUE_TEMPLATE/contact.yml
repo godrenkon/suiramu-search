@@ -1,0 +1,23 @@
+name: 💬 お問い合わせ / Contact
+description: 使い方の質問や不具合の報告など
+title: "[お問い合わせ] "
+labels: ["contact"]
+body:
+  - type: textarea
+    id: content
+    attributes:
+      label: 内容
+      description: お問い合わせ内容を書いてください
+      placeholder: 例）Codespaceが起動しません、〇〇の使い方を教えてください、など
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: カテゴリ
+      options:
+        - 使い方について
+        - 不具合の報告
+        - その他
+    validations:
+      required: false
