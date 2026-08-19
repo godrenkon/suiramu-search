@@ -1,8 +1,8 @@
-# 🌐 Suiramu
+# 🌐 Suiramu Search（S²）
 
-**「検索」と「動画視聴」に全振りした、あなた専用のリモートブラウザ**
+**「検索」と「動画視聴」に全振りした、学生のための学習アクセス環境**
 
-制限されたネットワーク環境でも、GitHub Codespace 上で本物の Chromium を動かして、そこ経由でインターネットにアクセスするツールです。
+GitHub Codespace 上で本物の Chromium を動かし、そこ経由でインターネットにアクセスするツールです。自分のパソコンには何もインストールせず、ブラウザだけで使えます。
 
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Status](https://img.shields.io/badge/status-active-brightgreen)
@@ -11,7 +11,7 @@
 
 ## 🎯 これは何？
 
-Suiramu には **2つのモード** があります。用途に合わせて選んで起動してください。
+Suiramu Search（略して **S²**）には **2つのモード** があります。用途に合わせて選んで起動してください。
 
 | モード | こんな時に | 特徴 |
 |---|---|---|
@@ -120,7 +120,7 @@ npm run video      ← 動画モードを起動
 
 サイドメニューの「お問い合わせ・要望」から、簡単なフォームで送信できます。送信すると GitHub の Issue 作成画面が開きます（GitHubアカウントが必要です）。
 
-直接投稿したい方は [こちら](https://github.com/godrenkon/page/issues/new/choose) からどうぞ。
+直接投稿したい方は [こちら](https://github.com/godrenkon/suiramu-search/issues/new/choose) からどうぞ。
 
 気軽な質問は公式Twitter（[@Riku_verse_](https://x.com/Riku_verse_)）でも歓迎です。
 
@@ -165,7 +165,7 @@ A. 使えます。本物のChromiumが動いているので、通常通りログ
 ## 📞 サポート
 
 - 🐦 Twitter: [@Riku_verse_](https://x.com/Riku_verse_)
-- 🐛 不具合報告・ご要望: [Issues](https://github.com/godrenkon/page/issues/new/choose)
+- 🐛 不具合報告・ご要望: [Issues](https://github.com/godrenkon/suiramu-search/issues/new/choose)
 
 ---
 
