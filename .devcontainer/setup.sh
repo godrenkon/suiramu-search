@@ -11,17 +11,40 @@ sudo apt-get install -y -qq \
   xvfb \
   x11vnc \
   fluxbox \
-  chromium-browser \
   fonts-noto-cjk \
   git \
   wget \
   net-tools \
   supervisor \
   pulseaudio \
-  ffmpeg \
-  > /dev/null 2>&1
+  ffmpeg
 
-echo "✅ システムパッケージ完了"
+echo "✅ 基本パッケージ完了"
+
+# ==== Chromium本体のインストール ====
+# Ubuntu 22.04の "chromium-browser" は snap 経由のラッパーで、
+# Codespace(コンテナ環境, snapdなし)では正しくインストールできないことがある。
+# そのため、実体を含む "chromium" パッケージを優先し、失敗したら明確にエラー表示する。
+echo "📦 Chromium 本体をインストール中..."
+if sudo apt-get install -y -qq chromium; then
+  CHROME_BIN="chromium"
+elif sudo apt-get install -y -qq chromium-browser; then
+  CHROME_BIN="chromium-browser"
+else
+  echo "❌ Chromiumのインストールに失敗しました。セットアップを中断します。"
+  exit 1
+fi
+
+# 実際に使えるコマンド名を確認して記録しておく（起動スクリプト側で参照する）
+if command -v chromium-browser > /dev/null 2>&1; then
+  echo "chromium-browser" > /tmp/suiramu-chrome-bin
+elif command -v chromium > /dev/null 2>&1; then
+  echo "chromium" > /tmp/suiramu-chrome-bin
+else
+  echo "❌ Chromiumの実行ファイルが見つかりません。セットアップを中断します。"
+  exit 1
+fi
+echo "✅ Chromium 本体: $(cat /tmp/suiramu-chrome-bin)"
 
 echo "📥 noVNC をダウンロード中..."
 if [ ! -d "/opt/novnc" ]; then
