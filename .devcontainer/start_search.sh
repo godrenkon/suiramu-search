@@ -30,7 +30,6 @@ x11vnc -display :1 -forever -shared -nopw -quiet &
 sleep 1
 
 # ==== 検索特化: 文字がくっきり見える高品質設定 ====
-# フレームレートは低めでよい代わりに、圧縮率を下げて文字を鮮明に保つ
 echo "🌐 noVNC 起動中（検索特化・高精細設定）..."
 /opt/novnc/utils/novnc_proxy \
   --vnc localhost:5900 \
@@ -40,8 +39,23 @@ sleep 2
 CHROME_PROFILE="$HOME/.suiramu-chrome-profile-search"
 mkdir -p "$CHROME_PROFILE"
 
-echo "🌏 ブラウザ起動中..."
-chromium-browser \
+# setup.sh が確認したChromiumの実行コマンド名を使う（なければその場で判定）
+if [ -f /tmp/suiramu-chrome-bin ]; then
+  CHROME_BIN=$(cat /tmp/suiramu-chrome-bin)
+elif command -v chromium-browser > /dev/null 2>&1; then
+  CHROME_BIN="chromium-browser"
+elif command -v chromium > /dev/null 2>&1; then
+  CHROME_BIN="chromium"
+else
+  echo ""
+  echo "❌ Chromiumが見つかりません。"
+  echo "   npm run setup を実行してセットアップをやり直してください。"
+  echo ""
+  exit 1
+fi
+
+echo "🌏 ブラウザ起動中（$CHROME_BIN）..."
+"$CHROME_BIN" \
   --no-sandbox \
   --disable-gpu \
   --disable-dev-shm-usage \
@@ -53,19 +67,31 @@ chromium-browser \
   --force-color-profile=srgb \
   --user-data-dir="$CHROME_PROFILE" \
   --restore-last-session \
-  "file://$(pwd)/home/search.html" &
+  "file://$(pwd)/home/search.html" \
+  > /tmp/suiramu-chrome.log 2>&1 &
 
-echo ""
-echo "✅ 起動完了！【検索特化モード】"
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  Codespace の「ポート」タブを開いて"
-echo "  6080番ポートのURLをクリックしてください"
-echo ""
-echo "  💡 文字がくっきり見える設定になっています"
-echo "  💡 動画を見るなら Ctrl+C で止めて"
-echo "     npm run video を実行してください"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
+CHROME_PID=$!
+sleep 3
+
+# Chromiumが本当に起動できたか確認する
+if ! kill -0 "$CHROME_PID" 2>/dev/null; then
+  echo ""
+  echo "❌ ブラウザの起動に失敗しました。"
+  echo "   ログを確認してください: cat /tmp/suiramu-chrome.log"
+  echo ""
+else
+  echo ""
+  echo "✅ 起動完了！【検索特化モード】"
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "  Codespace の「ポート」タブを開いて"
+  echo "  6080番ポートのURLをクリックしてください"
+  echo ""
+  echo "  💡 文字がくっきり見える設定になっています"
+  echo "  💡 動画を見るなら Ctrl+C で止めて"
+  echo "     npm run video を実行してください"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+fi
 
 wait
