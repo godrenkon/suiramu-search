@@ -276,8 +276,8 @@
   <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
   <div class="sidebar" id="sidebar">
     <div class="sidebar-item" onclick="location.href='index.html'">🏠 ホーム</div>
-    <div class="sidebar-item" onclick="alert('ブックマーク一覧（準備中）')">⭐ ブックマーク</div>
-    <div class="sidebar-item" onclick="alert('履歴（準備中）')">🕘 履歴</div>
+    <div class="sidebar-item" onclick="alert('保存サイトはホーム画面のタイルから開けます。\n右クリックで削除できます。\n\nChrome標準のブックマーク(★マーク)も使えます。')">⭐ 保存サイトについて</div>
+    <div class="sidebar-item" onclick="alert('閲覧履歴は Ctrl+H で見れます（Chrome標準機能）\n新しいタブは Ctrl+T です')">🕘 履歴・タブの使い方</div>
     <div class="sidebar-item" onclick="window.open('https://github.com/godrenkon/page','_blank')">📄 このツールについて</div>
     <div class="sidebar-item" onclick="window.open('https://x.com/Riku_verse_','_blank')">🐦 公式Twitter</div>
     <div class="sidebar-item" onclick="toggleAccountModal()">👤 アカウント設定</div>
@@ -342,40 +342,73 @@
     if(e.key==='Enter') doSearch();
   });
 
-  // ==== 保存サイト（localStorage管理・chrome風タイル） ====
+  // ==== 保存サイト（GitHubプライベートリポジトリと同期・chrome風タイル） ====
+  // データは .devcontainer/server.js が提供するローカルAPI(127.0.0.1:7070)経由で
+  // あなた専用のプライベートリポジトリ(suiramu-data)に自動保存されます
+  const API = 'http://127.0.0.1:7070';
   const DEFAULT_SITES = [
     {name:'GitHub', url:'https://github.com', icon:'🐙'},
     {name:'YouTube', url:'https://youtube.com', icon:'▶️'},
     {name:'Wikipedia', url:'https://wikipedia.org', icon:'📖'},
   ];
 
-  function loadSites(){
-    const saved = JSON.parse(localStorage.getItem('suiramu_sites') || 'null') || DEFAULT_SITES;
+  async function fetchSites(){
+    try{
+      const res = await fetch(API + '/bookmarks');
+      const data = await res.json();
+      return (data && data.length) ? data : DEFAULT_SITES;
+    }catch(e){
+      // データサーバーが未起動などの場合は、端末内の一時保存にフォールバック
+      return JSON.parse(localStorage.getItem('suiramu_sites_fallback') || 'null') || DEFAULT_SITES;
+    }
+  }
+
+  async function saveSites(sites){
+    try{
+      await fetch(API + '/bookmarks', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(sites)
+      });
+    }catch(e){
+      localStorage.setItem('suiramu_sites_fallback', JSON.stringify(sites));
+    }
+  }
+
+  async function loadSites(){
+    const saved = await fetchSites();
     const wrap = document.getElementById('savedSites');
     wrap.innerHTML = '';
-    saved.forEach(site=>{
+    saved.forEach((site, idx)=>{
       const el = document.createElement('div');
       el.className = 'site-tile';
       el.onclick = ()=> location.href = site.url;
+      el.oncontextmenu = (e)=>{ e.preventDefault(); removeSite(idx, saved); };
       el.innerHTML = `<div class="site-icon">${site.icon||'🌐'}</div><div class="site-name">${site.name}</div>`;
       wrap.appendChild(el);
     });
     // 追加ボタン
     const add = document.createElement('div');
     add.className = 'site-tile add-site';
-    add.onclick = addSite;
+    add.onclick = ()=>addSite(saved);
     add.innerHTML = `<div class="site-icon">＋</div><div class="site-name">追加</div>`;
     wrap.appendChild(add);
   }
 
-  function addSite(){
+  async function addSite(current){
     const name = prompt('サイト名を入力してください（例: Google）');
     if(!name) return;
     const url = prompt('URLを入力してください（例: https://google.com）');
     if(!url) return;
-    const saved = JSON.parse(localStorage.getItem('suiramu_sites') || 'null') || DEFAULT_SITES;
-    saved.push({name, url, icon:'🌐'});
-    localStorage.setItem('suiramu_sites', JSON.stringify(saved));
+    current.push({name, url, icon:'🌐'});
+    await saveSites(current);
+    loadSites();
+  }
+
+  async function removeSite(idx, current){
+    if(!confirm('このサイトを削除しますか？')) return;
+    current.splice(idx,1);
+    await saveSites(current);
     loadSites();
   }
 
