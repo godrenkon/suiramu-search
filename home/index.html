@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suiramu</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', sans-serif;
+    background: #f5f6f8;
+    color: #222;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ==== 上部バー ==== */
+  .topbar {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    background: #ffffff;
+    border-bottom: 1px solid #e4e4e7;
+  }
+  .topbar-left, .topbar-right { display:flex; align-items:center; gap:16px; }
+
+  .hamburger {
+    width: 40px; height: 40px;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background .2s;
+  }
+  .hamburger:hover { background: #f0f0f3; }
+  .hamburger span {
+    width: 20px; height: 2px; background: #444; border-radius: 2px;
+  }
+
+  .logo {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .account {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 15px;
+  }
+
+  /* ==== サイドメニュー ==== */
+  .sidebar {
+    position: fixed;
+    top: 0; left: -280px;
+    width: 280px; height: 100%;
+    background: white;
+    box-shadow: 2px 0 20px rgba(0,0,0,0.1);
+    transition: left .25s ease;
+    z-index: 100;
+    padding-top: 60px;
+  }
+  .sidebar.open { left: 0; }
+  .sidebar-item {
+    padding: 16px 24px;
+    cursor: pointer;
+    font-size: 15px;
+    display: flex; align-items: center; gap: 12px;
+    transition: background .15s;
+  }
+  .sidebar-item:hover { background: #f5f6f8; }
+  .overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 90;
+  }
+  .overlay.show { display: block; }
+
+  /* ==== メインエリア ==== */
+  .main {
+    height: calc(100vh - 60px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 8vh;
+    overflow-y: auto;
+  }
+
+  .logo-big {
+    font-size: 56px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 32px;
+  }
+
+  .search-wrap {
+    width: 90%;
+    max-width: 600px;
+    margin-bottom: 40px;
+  }
+  .search-box {
+    display: flex;
+    align-items: center;
+    background: white;
+    border: 1px solid #e0e0e5;
+    border-radius: 999px;
+    padding: 14px 22px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    transition: box-shadow .2s, border-color .2s;
+  }
+  .search-box:focus-within {
+    box-shadow: 0 4px 16px rgba(99,102,241,0.15);
+    border-color: #a5a5f5;
+  }
+  .search-box input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    background: transparent;
+  }
+  .search-icon { margin-right: 12px; color: #999; }
+  .search-go {
+    background: #6366f1;
+    color: white;
+    border: none;
+    border-radius: 999px;
+    padding: 8px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 10px;
+  }
+  .search-go:hover { background: #5153d1; }
+
+  /* ==== 保存サイト（chrome風） ==== */
+  .saved-sites {
+    width: 90%;
+    max-width: 700px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 18px;
+    margin-bottom: 40px;
+  }
+  .site-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+  .site-icon {
+    width: 56px; height: 56px;
+    border-radius: 16px;
+    background: white;
+    border: 1px solid #eee;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    transition: transform .15s;
+  }
+  .site-tile:hover .site-icon { transform: translateY(-3px); }
+  .site-name { font-size: 12px; color: #555; text-align: center; }
+
+  .add-site .site-icon { color: #aaa; border-style: dashed; }
+
+  /* ==== お知らせカード ==== */
+  .news-card {
+    width: 90%;
+    max-width: 700px;
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: transform .15s, box-shadow .15s;
+    margin-bottom: 40px;
+  }
+  .news-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  }
+  .news-image {
+    width: 120px; height: 80px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 24px;
+    flex-shrink: 0;
+  }
+  .news-text { padding: 14px 18px; }
+  .news-label {
+    font-size: 11px;
+    color: #6366f1;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .news-title { font-size: 14px; font-weight: 600; color: #222; }
+
+  /* ==== アカウントモーダル ==== */
+  .modal-bg {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-bg.show { display: flex; }
+  .modal {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    width: 320px;
+  }
+  .modal h3 { margin-bottom: 16px; }
+  .modal input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+  .modal button {
+    width: 100%;
+    padding: 10px;
+    background: #6366f1;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .modal .note {
+    font-size: 12px;
+    color: #999;
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="hamburger" onclick="toggleSidebar()">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+    <div class="logo">Suiramu</div>
+    <div class="topbar-right">
+      <div class="account" id="accountIcon" onclick="toggleAccountModal()">?</div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-item" onclick="location.href='index.html'">🏠 ホーム</div>
+    <div class="sidebar-item" onclick="alert('ブックマーク一覧（準備中）')">⭐ ブックマーク</div>
+    <div class="sidebar-item" onclick="alert('履歴（準備中）')">🕘 履歴</div>
+    <div class="sidebar-item" onclick="window.open('https://github.com/godrenkon/page','_blank')">📄 このツールについて</div>
+    <div class="sidebar-item" onclick="window.open('https://x.com/Riku_verse_','_blank')">🐦 公式Twitter</div>
+    <div class="sidebar-item" onclick="toggleAccountModal()">👤 アカウント設定</div>
+  </div>
+
+  <div class="main">
+    <div class="logo-big">Suiramu</div>
+
+    <div class="search-wrap">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="検索、またはURLを入力" autofocus>
+        <button class="search-go" onclick="doSearch()">検索</button>
+      </div>
+    </div>
+
+    <div class="saved-sites" id="savedSites"></div>
+
+    <div class="news-card" onclick="window.open('https://x.com/Riku_verse_','_blank')">
+      <div class="news-image">📢</div>
+      <div class="news-text">
+        <div class="news-label">最新のお知らせ</div>
+        <div class="news-title">公式Twitterで最新情報をチェック →</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- アカウントモーダル（※サーバー送信なし・端末内のみ保存） -->
+  <div class="modal-bg" id="modalBg" onclick="if(event.target===this) toggleAccountModal()">
+    <div class="modal">
+      <h3>プロフィール設定</h3>
+      <input type="text" id="nameInput" placeholder="表示名を入力">
+      <button onclick="saveProfile()">保存する</button>
+      <p class="note">
+        この情報はこのCodespace内だけに保存され、外部サーバーには一切送信されません。
+      </p>
+    </div>
+  </div>
+
+<script>
+  // ==== サイドメニュー ====
+  function toggleSidebar(){
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('show');
+  }
+
+  // ==== 検索 ====
+  function doSearch(){
+    const q = document.getElementById('searchInput').value.trim();
+    if(!q) return;
+    let url;
+    if(/^https?:\/\//.test(q)){
+      url = q;
+    } else if(/^[\w-]+\.[a-z]{2,}([\/?].*)?$/i.test(q)){
+      url = 'https://' + q;
+    } else {
+      url = 'https://www.google.com/search?q=' + encodeURIComponent(q);
+    }
+    location.href = url;
+  }
+  document.getElementById('searchInput').addEventListener('keydown', e=>{
+    if(e.key==='Enter') doSearch();
+  });
+
+  // ==== 保存サイト（localStorage管理・chrome風タイル） ====
+  const DEFAULT_SITES = [
+    {name:'GitHub', url:'https://github.com', icon:'🐙'},
+    {name:'YouTube', url:'https://youtube.com', icon:'▶️'},
+    {name:'Wikipedia', url:'https://wikipedia.org', icon:'📖'},
+  ];
+
+  function loadSites(){
+    const saved = JSON.parse(localStorage.getItem('suiramu_sites') || 'null') || DEFAULT_SITES;
+    const wrap = document.getElementById('savedSites');
+    wrap.innerHTML = '';
+    saved.forEach(site=>{
+      const el = document.createElement('div');
+      el.className = 'site-tile';
+      el.onclick = ()=> location.href = site.url;
+      el.innerHTML = `<div class="site-icon">${site.icon||'🌐'}</div><div class="site-name">${site.name}</div>`;
+      wrap.appendChild(el);
+    });
+    // 追加ボタン
+    const add = document.createElement('div');
+    add.className = 'site-tile add-site';
+    add.onclick = addSite;
+    add.innerHTML = `<div class="site-icon">＋</div><div class="site-name">追加</div>`;
+    wrap.appendChild(add);
+  }
+
+  function addSite(){
+    const name = prompt('サイト名を入力してください（例: Google）');
+    if(!name) return;
+    const url = prompt('URLを入力してください（例: https://google.com）');
+    if(!url) return;
+    const saved = JSON.parse(localStorage.getItem('suiramu_sites') || 'null') || DEFAULT_SITES;
+    saved.push({name, url, icon:'🌐'});
+    localStorage.setItem('suiramu_sites', JSON.stringify(saved));
+    loadSites();
+  }
+
+  loadSites();
+
+  // ==== アカウント（ローカルのみ・プロフィール名程度） ====
+  function toggleAccountModal(){
+    document.getElementById('modalBg').classList.toggle('show');
+    const name = localStorage.getItem('suiramu_name');
+    if(name) document.getElementById('nameInput').value = name;
+  }
+  function saveProfile(){
+    const name = document.getElementById('nameInput').value.trim();
+    if(name){
+      localStorage.setItem('suiramu_name', name);
+      document.getElementById('accountIcon').textContent = name[0].toUpperCase();
+    }
+    toggleAccountModal();
+  }
+  (function initAccount(){
+    const name = localStorage.getItem('suiramu_name');
+    if(name) document.getElementById('accountIcon').textContent = name[0].toUpperCase();
+  })();
+</script>
+
+</body>
+</html>
