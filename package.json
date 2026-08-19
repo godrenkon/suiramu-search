@@ -1,12 +1,10 @@
 {
-  "name": "page",
-  "version": "1.0.0",
-  "description": "制限されたネットワークでも世界中のサイトにアクセス可能にするツール",
+  "name": "suiramu-browser",
+  "version": "2.0.0",
+  "description": "Codespace上で動く、あなた専用のリモートブラウザ環境",
   "scripts": {
-    "archive": "node scripts/archive.js"
+    "start": "bash .devcontainer/start.sh",
+    "setup": "bash .devcontainer/setup.sh"
   },
-  "dependencies": {
-    "puppeteer": "^21.0.0",
-    "octokit": "^2.0.0"
-  }
+  "license": "MIT"
 }
