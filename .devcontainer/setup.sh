@@ -67,6 +67,16 @@ sudo apt-get install -y -qq \
 
 echo "✅ 基本パッケージ完了"
 
+# ==== 日本語入力(IME)のインストール ====
+# fcitx5 + Mozc で、Xvfb内のアプリ(Chromium含む)から日本語入力できるようにする
+echo "📦 日本語入力(IME)をインストール中..."
+sudo apt-get install -y -qq \
+  fcitx5 \
+  fcitx5-mozc \
+  fcitx5-config-qt \
+  > /dev/null 2>&1 || echo "⚠️  日本語入力のインストールに一部失敗しました（英数字入力は引き続き可能です）"
+echo "✅ 日本語入力の準備完了"
+
 # ==== Chromium本体のインストール ====
 # Ubuntu の "chromium" / "chromium-browser" apt パッケージは、
 # バージョンによっては実体を持たない snap 転送ラッパーになっており、
