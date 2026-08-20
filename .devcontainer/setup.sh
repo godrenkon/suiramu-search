@@ -3,7 +3,27 @@ set -e
 
 echo "🔧 Suiramu セットアップ開始..."
 
-sudo apt-get update -qq
+# Codespace起動直後は、裏側で別のapt-get/dpkgプロセスがまだ動いている場合がある。
+# 特殊なコマンド(fuser等、環境によって無いことがある)には依存せず、
+# apt-get自体を実行してみてロックエラーなら少し待ってリトライする方式にする。
+echo "⏳ パッケージマネージャの空きを確認中..."
+UPDATE_OK=0
+for attempt in 1 2 3 4 5 6 7 8 9 10; do
+  if sudo apt-get update -qq 2>/tmp/suiramu-apt-error.log; then
+    UPDATE_OK=1
+    break
+  fi
+  if grep -q "Could not get lock\|dpkg frontend lock\|Unable to acquire" /tmp/suiramu-apt-error.log 2>/dev/null; then
+    sleep 3
+    continue
+  fi
+  # ロック以外の理由での失敗は、そのまま表示して次に進む(update自体は必須ではない)
+  break
+done
+if [ "$UPDATE_OK" -eq 0 ]; then
+  echo "⚠️  apt-get update に時間がかかっています。そのまま続行します。"
+  cat /tmp/suiramu-apt-error.log 2>/dev/null
+fi
 
 echo "📦 必要パッケージをインストール中（少し時間がかかります）..."
 
@@ -13,9 +33,19 @@ echo "📦 必要パッケージをインストール中（少し時間がかか
 install_pkg() {
   local primary="$1"
   local fallback="$2"
-  if sudo apt-get install -y -qq "$primary" 2>/tmp/suiramu-apt-error.log; then
-    return 0
-  fi
+  local attempt
+
+  for attempt in 1 2 3; do
+    if sudo apt-get install -y -qq "$primary" 2>/tmp/suiramu-apt-error.log; then
+      return 0
+    fi
+    if grep -q "Could not get lock\|dpkg frontend lock" /tmp/suiramu-apt-error.log 2>/dev/null; then
+      sleep 3
+      continue
+    fi
+    break
+  done
+
   if [ -n "$fallback" ] && sudo apt-get install -y -qq "$fallback" 2>/tmp/suiramu-apt-error.log; then
     return 0
   fi
