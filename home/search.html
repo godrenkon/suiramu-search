@@ -294,7 +294,7 @@
     <div class="sidebar-item" onclick="showAlert('history_info')">🕘 <span data-i18n="menu_history"></span></div>
     <div class="sidebar-item" onclick="window.open('https://github.com/godrenkon/suiramu-search','_blank')">📄 <span data-i18n="menu_about"></span></div>
     <div class="sidebar-item" onclick="openContactModal()">✉️ <span data-i18n="menu_contact"></span></div>
-    <div class="sidebar-item" onclick="window.open('https://x.com/Riku_verse_','_blank')">🐦 <span data-i18n="menu_twitter"></span></div>
+    <div class="sidebar-item" onclick="window.open('https://github.com/godrenkon/suiramu-search/blob/main/CHANGELOG.md','_blank')">📢 <span data-i18n="menu_changelog"></span></div>
     <div class="sidebar-item" onclick="toggleAccountModal()">👤 <span data-i18n="menu_account"></span></div>
   </div>
 
@@ -317,7 +317,7 @@
 
     <div class="saved-sites" id="savedSites"></div>
 
-    <div class="news-card" onclick="window.open('https://x.com/Riku_verse_','_blank')">
+    <div class="news-card" onclick="window.open('https://github.com/godrenkon/suiramu-search/blob/main/CHANGELOG.md','_blank')">
       <div class="news-image">📢</div>
       <div class="news-text">
         <div class="news-label" data-i18n="news_label"></div>
@@ -354,10 +354,10 @@
   const I18N = {
     ja: {
       menu_home: 'ホーム', menu_bookmarks: '保存サイトについて', menu_history: '履歴・タブの使い方',
-      menu_about: 'このツールについて', menu_twitter: '公式Twitter', menu_account: 'アカウント設定',
+      menu_about: 'このツールについて', menu_changelog: '更新履歴', menu_account: 'アカウント設定',
       menu_contact: 'お問い合わせ・要望',
       search_placeholder: '検索、またはURLを入力', search_button: '検索',
-      news_label: '最新のお知らせ', news_title: '公式Twitterで最新情報をチェック →',
+      news_label: '最新のお知らせ', news_title: 'Suiramuの更新情報を見る →',
       profile_title: 'プロフィール設定', profile_placeholder: '表示名を入力', profile_save: '保存する',
       profile_note: 'この情報はこのCodespace内だけに保存され、外部サーバーには一切送信されません。',
       bookmarks_info: '保存サイトはホーム画面のタイルから開けます。\n右クリックで削除できます。\n\nChrome標準のブックマーク(★マーク)も使えます。',
@@ -376,10 +376,10 @@
     },
     en: {
       menu_home: 'Home', menu_bookmarks: 'About saved sites', menu_history: 'History & tabs',
-      menu_about: 'About this tool', menu_twitter: 'Official Twitter', menu_account: 'Account settings',
+      menu_about: 'About this tool', menu_changelog: 'Changelog', menu_account: 'Account settings',
       menu_contact: 'Contact / Feedback',
       search_placeholder: 'Search or enter a URL', search_button: 'Search',
-      news_label: 'Latest news', news_title: 'Check the latest updates on Twitter →',
+      news_label: 'Latest news', news_title: 'See what\'s new in Suiramu →',
       profile_title: 'Profile settings', profile_placeholder: 'Enter a display name', profile_save: 'Save',
       profile_note: 'This is only stored inside this Codespace and is never sent to an external server.',
       bookmarks_info: 'Open saved sites from the tiles on the home screen.\nRight-click to remove one.\n\nYou can also use Chrome\'s built-in bookmarks (★).',
@@ -398,10 +398,10 @@
     },
     zh: {
       menu_home: '主页', menu_bookmarks: '关于保存的网站', menu_history: '历史记录与标签页',
-      menu_about: '关于此工具', menu_twitter: '官方推特', menu_account: '账户设置',
+      menu_about: '关于此工具', menu_changelog: '更新日志', menu_account: '账户设置',
       menu_contact: '联系我们 / 意见反馈',
       search_placeholder: '搜索或输入网址', search_button: '搜索',
-      news_label: '最新公告', news_title: '在官方推特查看最新消息 →',
+      news_label: '最新公告', news_title: '查看 Suiramu 的更新内容 →',
       profile_title: '个人资料设置', profile_placeholder: '输入显示名称', profile_save: '保存',
       profile_note: '此信息仅保存在此 Codespace 内，绝不会发送到外部服务器。',
       bookmarks_info: '可从主页的图标打开保存的网站。\n右键点击可删除。\n\n也可以使用 Chrome 自带的书签功能（★）。',
@@ -420,10 +420,10 @@
     },
     ko: {
       menu_home: '홈', menu_bookmarks: '저장된 사이트 안내', menu_history: '기록 및 탭 사용법',
-      menu_about: '이 도구에 대해', menu_twitter: '공식 트위터', menu_account: '계정 설정',
+      menu_about: '이 도구에 대해', menu_changelog: '업데이트 내역', menu_account: '계정 설정',
       menu_contact: '문의 / 건의사항',
       search_placeholder: '검색어 또는 URL 입력', search_button: '검색',
-      news_label: '최신 소식', news_title: '공식 트위터에서 최신 소식 확인하기 →',
+      news_label: '최신 소식', news_title: 'Suiramu의 업데이트 내용 보기 →',
       profile_title: '프로필 설정', profile_placeholder: '표시 이름 입력', profile_save: '저장',
       profile_note: '이 정보는 이 Codespace 안에만 저장되며 외부 서버로 전송되지 않습니다.',
       bookmarks_info: '저장된 사이트는 홈 화면 타일에서 열 수 있습니다.\n우클릭하면 삭제할 수 있습니다.\n\nChrome 기본 북마크(★)도 사용할 수 있습니다.',
@@ -442,10 +442,10 @@
     },
     es: {
       menu_home: 'Inicio', menu_bookmarks: 'Sobre sitios guardados', menu_history: 'Historial y pestañas',
-      menu_about: 'Acerca de esta herramienta', menu_twitter: 'Twitter oficial', menu_account: 'Configuración de cuenta',
+      menu_about: 'Acerca de esta herramienta', menu_changelog: 'Historial de cambios', menu_account: 'Configuración de cuenta',
       menu_contact: 'Contacto / Sugerencias',
       search_placeholder: 'Buscar o escribir una URL', search_button: 'Buscar',
-      news_label: 'Últimas noticias', news_title: 'Consulta las últimas novedades en Twitter →',
+      news_label: 'Últimas noticias', news_title: 'Ver las novedades de Suiramu →',
       profile_title: 'Configuración de perfil', profile_placeholder: 'Introduce un nombre para mostrar', profile_save: 'Guardar',
       profile_note: 'Esta información solo se guarda dentro de este Codespace y nunca se envía a un servidor externo.',
       bookmarks_info: 'Abre los sitios guardados desde los iconos de la pantalla de inicio.\nClic derecho para eliminar uno.\n\nTambién puedes usar los marcadores nativos de Chrome (★).',
@@ -464,10 +464,10 @@
     },
     fr: {
       menu_home: 'Accueil', menu_bookmarks: 'À propos des sites enregistrés', menu_history: 'Historique et onglets',
-      menu_about: 'À propos de cet outil', menu_twitter: 'Twitter officiel', menu_account: 'Paramètres du compte',
+      menu_about: 'À propos de cet outil', menu_changelog: 'Journal des mises à jour', menu_account: 'Paramètres du compte',
       menu_contact: 'Contact / Suggestions',
       search_placeholder: 'Rechercher ou saisir une URL', search_button: 'Rechercher',
-      news_label: 'Dernières actualités', news_title: 'Voir les dernières actualités sur Twitter →',
+      news_label: 'Dernières actualités', news_title: 'Voir les nouveautés de Suiramu →',
       profile_title: 'Paramètres du profil', profile_placeholder: 'Entrez un nom affiché', profile_save: 'Enregistrer',
       profile_note: 'Cette information est stockée uniquement dans ce Codespace et n\'est jamais envoyée à un serveur externe.',
       bookmarks_info: 'Ouvrez les sites enregistrés depuis les icônes de la page d\'accueil.\nClic droit pour en supprimer un.\n\nVous pouvez aussi utiliser les favoris natifs de Chrome (★).',
