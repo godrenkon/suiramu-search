@@ -91,8 +91,17 @@ if [ ! -d "node_modules/puppeteer" ]; then
   npm install puppeteer --silent
 fi
 
+# Puppeteerのpostinstallでダウンロードされない場合に備えて、明示的にも取得しておく
+npx --yes puppeteer browsers install chrome > /tmp/puppeteer-install.log 2>&1 || true
+
 # Puppeteerがダウンロードした実際のChromium実行ファイルのパスを取得
-CHROME_PATH=$(node -e "console.log(require('puppeteer').executablePath())" 2>/dev/null || echo "")
+CHROME_PATH=$(node -e "
+require('puppeteer').executablePath().then(p => {
+  console.log(p);
+}).catch(() => {
+  process.exit(1);
+});
+" 2>/dev/null || echo "")
 
 if [ -z "$CHROME_PATH" ] || [ ! -f "$CHROME_PATH" ]; then
   echo "❌ Chromiumの取得に失敗しました。セットアップを中断します。"
