@@ -7,75 +7,57 @@ sudo apt-get update -qq
 
 echo "📦 必要パッケージをインストール中（少し時間がかかります）..."
 
-sudo apt-get install -y -qq \
-  xvfb \
-  x11vnc \
-  fluxbox \
-  fonts-noto-cjk \
-  git \
-  wget \
-  net-tools \
-  supervisor \
-  pulseaudio \
-  ffmpeg \
-  ca-certificates \
-  libnss3 \
-  libatk1.0-0 \
-  libatk-bridge2.0-0 \
-  libcups2 \
-  libdrm2 \
-  libxkbcommon0 \
-  libxcomposite1 \
-  libxdamage1 \
-  libxfixes3 \
-  libxrandr2 \
-  libgbm1 \
-  libasound2t64 \
-  libpango-1.0-0 \
-  libpangocairo-1.0-0 \
-  libatspi2.0-0 \
-  libgtk-3-0t64 \
-  > /dev/null 2>&1 || sudo apt-get install -y -qq \
-  xvfb \
-  x11vnc \
-  fluxbox \
-  fonts-noto-cjk \
-  git \
-  wget \
-  net-tools \
-  supervisor \
-  pulseaudio \
-  ffmpeg \
-  ca-certificates \
-  libnss3 \
-  libatk1.0-0 \
-  libatk-bridge2.0-0 \
-  libcups2 \
-  libdrm2 \
-  libxkbcommon0 \
-  libxcomposite1 \
-  libxdamage1 \
-  libxfixes3 \
-  libxrandr2 \
-  libgbm1 \
-  libasound2 \
-  libpango-1.0-0 \
-  libpangocairo-1.0-0 \
-  libatspi2.0-0 \
-  libgtk-3-0 \
-  > /dev/null 2>&1
+# Ubuntuのバージョンによってパッケージ名(t64サフィックスの有無など)が異なることがあるため、
+# 1つずつ個別にインストールし、失敗したものだけ代替名を試す。
+# 全体を1コマンドにまとめて丸ごと失敗させる(かつエラーを隠す)構成はもう使わない。
+install_pkg() {
+  local primary="$1"
+  local fallback="$2"
+  if sudo apt-get install -y -qq "$primary" 2>/tmp/suiramu-apt-error.log; then
+    return 0
+  fi
+  if [ -n "$fallback" ] && sudo apt-get install -y -qq "$fallback" 2>/tmp/suiramu-apt-error.log; then
+    return 0
+  fi
+  echo "⚠️  パッケージ '$primary' のインストールに失敗しました（続行します）"
+  cat /tmp/suiramu-apt-error.log
+  return 1
+}
+
+install_pkg xvfb
+install_pkg x11vnc
+install_pkg fluxbox
+install_pkg fonts-noto-cjk
+install_pkg git
+install_pkg wget
+install_pkg net-tools
+install_pkg supervisor
+install_pkg pulseaudio
+install_pkg ffmpeg
+install_pkg ca-certificates
+install_pkg libnss3
+install_pkg libatk1.0-0
+install_pkg libatk-bridge2.0-0
+install_pkg libcups2
+install_pkg libdrm2
+install_pkg libxkbcommon0
+install_pkg libxcomposite1
+install_pkg libxdamage1
+install_pkg libxfixes3
+install_pkg libxrandr2
+install_pkg libgbm1
+install_pkg libasound2t64 libasound2
+install_pkg libpango-1.0-0
+install_pkg libpangocairo-1.0-0
+install_pkg libatspi2.0-0
+install_pkg libgtk-3-0t64 libgtk-3-0
 
 echo "✅ 基本パッケージ完了"
 
 # ==== 入力システム(IME)の土台をインストール ====
-# fcitx5本体(入力フレームワーク)のみを用意する。
-# 日本語/中国語/韓国語など、実際に使う言語のIMEは
-# README記載のコマンドで、使う人自身が必要なものだけ追加する形にしている
 echo "📦 入力システム(IME)の土台をインストール中..."
-sudo apt-get install -y -qq \
-  fcitx5 \
-  fcitx5-config-qt \
-  > /dev/null 2>&1 || echo "⚠️  入力システムのインストールに一部失敗しました（英数字入力は引き続き可能です）"
+install_pkg fcitx5
+install_pkg fcitx5-config-qt
 echo "✅ 入力システムの準備完了"
 
 # ==== Chromium本体のインストール ====
@@ -92,30 +74,47 @@ if [ ! -d "node_modules/puppeteer" ]; then
 fi
 
 # Puppeteerのpostinstallでダウンロードされない場合に備えて、明示的にも取得しておく
-npx --yes puppeteer browsers install chrome > /tmp/puppeteer-install.log 2>&1 || true
+echo "📥 Chromium バイナリをダウンロード中..."
+npx --yes puppeteer browsers install chrome 2>&1 | tee /tmp/puppeteer-install.log
 
 # Puppeteerがダウンロードした実際のChromium実行ファイルのパスを取得
+# (executablePath()は非同期関数のため、Promiseを正しく待つ)
 CHROME_PATH=$(node -e "
 require('puppeteer').executablePath().then(p => {
   console.log(p);
-}).catch(() => {
+}).catch(err => {
+  console.error(err.message);
   process.exit(1);
 });
-" 2>/dev/null || echo "")
+" 2>/tmp/suiramu-chrome-path-error.log)
 
 if [ -z "$CHROME_PATH" ] || [ ! -f "$CHROME_PATH" ]; then
-  echo "❌ Chromiumの取得に失敗しました。セットアップを中断します。"
+  echo "❌ Chromiumの取得に失敗しました。"
+  echo "エラー内容:"
+  cat /tmp/suiramu-chrome-path-error.log
+  echo "---"
+  echo "Puppeteerインストールログ:"
+  cat /tmp/puppeteer-install.log
   exit 1
 fi
 
 echo "$CHROME_PATH" > /tmp/suiramu-chrome-bin
 echo "✅ Chromium 本体: $CHROME_PATH"
 
+# ==== 仮想ディスプレイ用ディレクトリを事前準備 ====
+# 非rootユーザーだと /tmp/.X11-unix を自動作成できず
+# 「_XSERVTransmkdir: ERROR: euid != 0」で失敗することがあるため、事前にsudoで用意しておく
+echo "🖥️  ディスプレイ用ディレクトリを準備中..."
+sudo mkdir -p /tmp/.X11-unix
+sudo chmod 1777 /tmp/.X11-unix
+echo "✅ 準備完了"
+
 echo "📥 noVNC をダウンロード中..."
 if [ ! -d "/opt/novnc" ]; then
-  sudo git clone --depth 1 https://github.com/novnc/noVNC.git /opt/novnc > /dev/null 2>&1
-  sudo git clone --depth 1 https://github.com/novnc/websockify /opt/novnc/utils/websockify > /dev/null 2>&1
+  sudo git clone --depth 1 https://github.com/novnc/noVNC.git /opt/novnc
+  sudo git clone --depth 1 https://github.com/novnc/websockify /opt/novnc/utils/websockify
 fi
+sudo chmod -R a+rX /opt/novnc
 echo "✅ noVNC 完了"
 
 echo ""
