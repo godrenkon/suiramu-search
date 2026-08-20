@@ -1,3 +1,7 @@
+<p align="right">
+🌐 <b>日本語</b> | <a href="docs/README.en.md">English</a> | <a href="docs/README.zh.md">中文</a> | <a href="docs/README.ko.md">한국어</a> | <a href="docs/README.es.md">Español</a> | <a href="docs/README.fr.md">Français</a>
+</p>
+
 # 🌐 Suiramu Search（S.S.）
 
 **「検索」と「動画視聴」に全振りした、学生のための学習アクセス環境**
