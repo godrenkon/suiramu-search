@@ -106,13 +106,16 @@ sleep 2
 echo "🌏 ブラウザ起動中..."
 bash "$LAUNCH_SEARCH" > /tmp/suiramu-chrome.log 2>&1 &
 
-CHROME_PID=$!
-sleep 3
+sleep 4
 
-if ! kill -0 "$CHROME_PID" 2>/dev/null; then
+CHROME_PROC_NAME=$(basename "$CHROME_BIN")
+if ! pgrep -f "$CHROME_PROC_NAME" > /dev/null 2>&1; then
   echo ""
   echo "❌ ブラウザの起動に失敗しました。"
-  echo "   ログを確認してください: cat /tmp/suiramu-chrome.log"
+  echo "───────────────────────────────"
+  echo "エラーログ (/tmp/suiramu-chrome.log):"
+  cat /tmp/suiramu-chrome.log 2>/dev/null | tail -20
+  echo "───────────────────────────────"
   echo ""
 else
   echo ""
