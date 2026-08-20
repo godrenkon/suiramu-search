@@ -23,11 +23,54 @@ Xvfb :1 -screen 0 1280x800x24 &
 sleep 2
 export DISPLAY=:1
 
+if [ -f /tmp/suiramu-chrome-bin ]; then
+  CHROME_BIN=$(cat /tmp/suiramu-chrome-bin)
+fi
+if [ -z "$CHROME_BIN" ] || [ ! -x "$CHROME_BIN" ]; then
+  echo ""
+  echo "❌ Chromiumが見つかりません。"
+  echo "   npm run setup を実行してセットアップをやり直してください。"
+  echo ""
+  exit 1
+fi
+
+CHROME_PROFILE="$HOME/.suiramu-chrome-profile-video"
+mkdir -p "$CHROME_PROFILE"
+REPO_DIR="$(pwd)"
+
+LAUNCH_SEARCH="$HOME/.suiramu-launch-search.sh"
+cat > "$LAUNCH_SEARCH" << EOF
+#!/bin/bash
+export DISPLAY=:1
+"$CHROME_BIN" \\
+  --no-sandbox --disable-gpu --disable-dev-shm-usage \\
+  --start-maximized --window-position=0,0 --window-size=1280,800 \\
+  --no-first-run --disable-infobars --force-color-profile=srgb \\
+  --user-data-dir="$HOME/.suiramu-chrome-profile-search" \\
+  "file://$REPO_DIR/home/search.html"
+EOF
+chmod +x "$LAUNCH_SEARCH"
+
+LAUNCH_VIDEO="$HOME/.suiramu-launch-video.sh"
+cat > "$LAUNCH_VIDEO" << EOF
+#!/bin/bash
+export DISPLAY=:1
+"$CHROME_BIN" \\
+  --no-sandbox --disable-gpu --disable-dev-shm-usage \\
+  --start-maximized --window-position=0,0 --window-size=1280,800 \\
+  --no-first-run --disable-infobars --autoplay-policy=no-user-gesture-required \\
+  --user-data-dir="$CHROME_PROFILE" \\
+  "file://$REPO_DIR/home/video.html"
+EOF
+chmod +x "$LAUNCH_VIDEO"
+
+mkdir -p "$HOME/.fluxbox"
+cp -f .devcontainer/fluxbox-menu "$HOME/.fluxbox/menu"
+
 echo "🪟 ウィンドウマネージャ起動中..."
 fluxbox > /tmp/fluxbox.log 2>&1 &
 sleep 1
 
-# ==== 音声セットアップ: 仮想スピーカーを作成 ====
 echo "🔊 音声デバイスをセットアップ中..."
 pulseaudio --start --exit-idle-time=-1 > /tmp/pulseaudio.log 2>&1
 sleep 1
@@ -39,11 +82,8 @@ echo "🔊 音声ストリーミングサーバー起動中..."
 node .devcontainer/audio_server.js > /tmp/suiramu-audio.log 2>&1 &
 sleep 1
 
-# ==== 動画特化: なめらかさ優先の圧縮設定 ====
 echo "🌐 noVNC 起動中（動画特化・なめらか設定）..."
-
 cp -f home/connect.html /opt/novnc/index.html 2>/dev/null || true
-
 /opt/novnc/utils/novnc_proxy \
   --vnc localhost:5900 \
   --listen 6080 &
@@ -53,36 +93,8 @@ pkill x11vnc 2>/dev/null || true
 x11vnc -display :1 -forever -shared -nopw -quiet -ncache 10 -wait 5 &
 sleep 1
 
-CHROME_PROFILE="$HOME/.suiramu-chrome-profile-video"
-mkdir -p "$CHROME_PROFILE"
-
-if [ -f /tmp/suiramu-chrome-bin ]; then
-  CHROME_BIN=$(cat /tmp/suiramu-chrome-bin)
-fi
-
-if [ -z "$CHROME_BIN" ] || [ ! -x "$CHROME_BIN" ]; then
-  echo ""
-  echo "❌ Chromiumが見つかりません。"
-  echo "   npm run setup を実行してセットアップをやり直してください。"
-  echo ""
-  exit 1
-fi
-
 echo "🌏 ブラウザ起動中..."
-"$CHROME_BIN" \
-  --no-sandbox \
-  --disable-gpu \
-  --disable-dev-shm-usage \
-  --start-maximized \
-  --window-position=0,0 \
-  --window-size=1280,800 \
-  --no-first-run \
-  --disable-infobars \
-  --autoplay-policy=no-user-gesture-required \
-  --user-data-dir="$CHROME_PROFILE" \
-  --restore-last-session \
-  "file://$(pwd)/home/video.html" \
-  > /tmp/suiramu-chrome.log 2>&1 &
+bash "$LAUNCH_VIDEO" > /tmp/suiramu-chrome.log 2>&1 &
 
 CHROME_PID=$!
 sleep 3
@@ -101,8 +113,11 @@ else
   echo "     （自動でSuiramuの画面に接続されます）"
   echo "  ② 音声: 開いた画面の下部にある"
   echo "     🔊 音声プレーヤー の再生ボタンを押す"
-  echo "     （ブラウザの仕様上、自動再生できないため"
-  echo "      最初の1回だけ手動で押す必要があります）"
+  echo ""
+  echo "  💡 もしSuiramuのタブを間違って閉じてしまったら："
+  echo "     画面の何もない場所を右クリック →"
+  echo "     「Suiramu」→「🎬 Suiramuを開く（動画）」"
+  echo "     で、ターミナル操作なしにすぐ復帰できます"
   echo ""
   echo "  💡 文字を読む作業がメインなら Ctrl+C で止めて"
   echo "     npm run search を実行してください"
