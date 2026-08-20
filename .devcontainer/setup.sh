@@ -105,11 +105,22 @@ fi
 
 # Puppeteerのpostinstallでダウンロードされない場合に備えて、明示的にも取得しておく
 echo "📥 Chromium バイナリをダウンロード中..."
-npx --yes puppeteer browsers install chrome 2>&1 | tee /tmp/puppeteer-install.log
+INSTALL_OUTPUT=$(npx --yes puppeteer browsers install chrome 2>&1)
+echo "$INSTALL_OUTPUT" | tee /tmp/puppeteer-install.log
 
-# Puppeteerがダウンロードした実際のChromium実行ファイルのパスを取得
-# (executablePath()は非同期関数のため、Promiseを正しく待つ)
-CHROME_PATH=$(node -e "
+# Chromiumの実行パスを取得する。
+# 方法1: install コマンドの出力自体に "chrome@バージョン /絶対パス/chrome" という形で
+#         パスが含まれているので、そこから直接取り出す（一番確実で、環境差異の影響を受けにくい）
+# 方法2: 念のため executablePath() でも取得を試み、方法1で失敗した場合のみ使う
+#         (executablePath()は非同期関数のため、Promiseを正しく待つ)
+# set -e の影響でこのブロックの途中終了を避けるため、ここだけ一時的にエラー即終了を無効化する
+set +e
+
+CHROME_PATH=$(echo "$INSTALL_OUTPUT" | grep '^chrome@' | tail -1 | awk '{print $NF}')
+
+if [ -z "$CHROME_PATH" ] || [ ! -f "$CHROME_PATH" ]; then
+  echo "ℹ️  install コマンドの出力からパスを取得できなかったため、別の方法を試します..."
+  CHROME_PATH=$(node -e "
 require('puppeteer').executablePath().then(p => {
   console.log(p);
 }).catch(err => {
@@ -117,11 +128,14 @@ require('puppeteer').executablePath().then(p => {
   process.exit(1);
 });
 " 2>/tmp/suiramu-chrome-path-error.log)
+fi
+
+set -e
 
 if [ -z "$CHROME_PATH" ] || [ ! -f "$CHROME_PATH" ]; then
   echo "❌ Chromiumの取得に失敗しました。"
   echo "エラー内容:"
-  cat /tmp/suiramu-chrome-path-error.log
+  cat /tmp/suiramu-chrome-path-error.log 2>/dev/null
   echo "---"
   echo "Puppeteerインストールログ:"
   cat /tmp/puppeteer-install.log
