@@ -19,6 +19,8 @@ node .devcontainer/server.js > /tmp/suiramu-server.log 2>&1 &
 sleep 1
 
 echo "🖥️  仮想ディスプレイ起動中..."
+sudo mkdir -p /tmp/.X11-unix 2>/dev/null || true
+sudo chmod 1777 /tmp/.X11-unix 2>/dev/null || true
 Xvfb :1 -screen 0 1280x800x24 &
 sleep 2
 export DISPLAY=:1
@@ -26,9 +28,18 @@ export DISPLAY=:1
 if [ -f /tmp/suiramu-chrome-bin ]; then
   CHROME_BIN=$(cat /tmp/suiramu-chrome-bin)
 fi
-if [ -z "$CHROME_BIN" ] || [ ! -x "$CHROME_BIN" ]; then
+if [ -z "$CHROME_BIN" ]; then
+  echo ""
+  echo "❌ Chromiumが見つかりません（/tmp/suiramu-chrome-bin が存在しません）。"
+  echo "   npm run setup を実行してセットアップを行ってください。"
+  echo ""
+  exit 1
+fi
+if [ ! -x "$CHROME_BIN" ]; then
   echo ""
   echo "❌ Chromiumが見つかりません。"
+  echo "   記録されていたパス: $CHROME_BIN"
+  echo "   このファイルが存在しないか、実行権限がありません。"
   echo "   npm run setup を実行してセットアップをやり直してください。"
   echo ""
   exit 1
