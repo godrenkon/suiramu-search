@@ -42,6 +42,9 @@ LAUNCH_SEARCH="$HOME/.suiramu-launch-search.sh"
 cat > "$LAUNCH_SEARCH" << EOF
 #!/bin/bash
 export DISPLAY=:1
+export GTK_IM_MODULE=fcitx
+export QT_IM_MODULE=fcitx
+export XMODIFIERS=@im=fcitx
 "$CHROME_BIN" \\
   --no-sandbox --disable-gpu --disable-dev-shm-usage \\
   --start-maximized --window-position=0,0 --window-size=1280,800 \\
@@ -55,6 +58,9 @@ LAUNCH_VIDEO="$HOME/.suiramu-launch-video.sh"
 cat > "$LAUNCH_VIDEO" << EOF
 #!/bin/bash
 export DISPLAY=:1
+export GTK_IM_MODULE=fcitx
+export QT_IM_MODULE=fcitx
+export XMODIFIERS=@im=fcitx
 "$CHROME_BIN" \\
   --no-sandbox --disable-gpu --disable-dev-shm-usage \\
   --start-maximized --window-position=0,0 --window-size=1280,800 \\
@@ -70,6 +76,17 @@ cp -f .devcontainer/fluxbox-menu "$HOME/.fluxbox/menu"
 echo "🪟 ウィンドウマネージャ起動中..."
 fluxbox > /tmp/fluxbox.log 2>&1 &
 sleep 1
+
+# ==== 日本語入力(IME)を有効化 ====
+export GTK_IM_MODULE=fcitx
+export QT_IM_MODULE=fcitx
+export XMODIFIERS=@im=fcitx
+export INPUT_METHOD=fcitx
+if command -v fcitx5 > /dev/null 2>&1; then
+  echo "⌨️  日本語入力(IME)を起動中..."
+  fcitx5 --replace -d > /tmp/fcitx5.log 2>&1 &
+  sleep 1
+fi
 
 echo "🔊 音声デバイスをセットアップ中..."
 pulseaudio --start --exit-idle-time=-1 > /tmp/pulseaudio.log 2>&1
