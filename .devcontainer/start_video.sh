@@ -25,6 +25,12 @@ Xvfb :1 -screen 0 1280x800x24 &
 sleep 2
 export DISPLAY=:1
 
+# 音声サーバー(PulseAudio)のソケットが確実に見つかる場所を、
+# Chromium含む全プロセスで共通して使うために明示的に指定する
+export XDG_RUNTIME_DIR="$HOME/.suiramu-runtime"
+mkdir -p "$XDG_RUNTIME_DIR"
+chmod 700 "$XDG_RUNTIME_DIR"
+
 if [ -f /tmp/suiramu-chrome-bin ]; then
   CHROME_BIN=$(cat /tmp/suiramu-chrome-bin)
 fi
@@ -72,6 +78,8 @@ export DISPLAY=:1
 export GTK_IM_MODULE=fcitx
 export QT_IM_MODULE=fcitx
 export XMODIFIERS=@im=fcitx
+export XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR"
+export PULSE_SERVER="unix:$XDG_RUNTIME_DIR/pulse/native"
 "$CHROME_BIN" \\
   --no-sandbox --disable-gpu --disable-dev-shm-usage \\
   --start-maximized --window-position=0,0 --window-size=1280,800 \\
@@ -100,14 +108,17 @@ if command -v fcitx5 > /dev/null 2>&1; then
 fi
 
 echo "🔊 音声デバイスをセットアップ中..."
-pulseaudio --start --exit-idle-time=-1 > /tmp/pulseaudio.log 2>&1
-sleep 1
-pactl load-module module-null-sink sink_name=suiramu_speaker sink_properties=device.description=SuiramuSpeaker > /dev/null 2>&1 || true
-pactl set-default-sink suiramu_speaker > /dev/null 2>&1 || true
-echo "✅ 音声デバイス準備完了"
+XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" pulseaudio --start --exit-idle-time=-1 -D > /tmp/pulseaudio.log 2>&1
+sleep 2
+XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" PULSE_SERVER="unix:$XDG_RUNTIME_DIR/pulse/native" \
+  pactl load-module module-null-sink sink_name=suiramu_speaker sink_properties=device.description=SuiramuSpeaker > /dev/null 2>&1 || true
+XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" PULSE_SERVER="unix:$XDG_RUNTIME_DIR/pulse/native" \
+  pactl set-default-sink suiramu_speaker > /dev/null 2>&1 || true
+echo "✅ 音声デバイス準備完了 (XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR)"
 
 echo "🔊 音声ストリーミングサーバー起動中..."
-node .devcontainer/audio_server.js > /tmp/suiramu-audio.log 2>&1 &
+XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" PULSE_SERVER="unix:$XDG_RUNTIME_DIR/pulse/native" \
+  node .devcontainer/audio_server.js > /tmp/suiramu-audio.log 2>&1 &
 sleep 1
 
 echo "🌐 noVNC 起動中（動画特化・なめらか設定）..."
@@ -147,6 +158,9 @@ else
   echo "  ② 音声: 開いた画面の下部にある"
   echo "     🔊 音声プレーヤー の再生ボタンを押す"
   echo ""
+  echo "  💡 音が出ない場合、ターミナルで次を確認できます:"
+  echo "     cat /tmp/suiramu-audio.log"
+  echo "     cat /tmp/pulseaudio.log"
   echo "  💡 もしSuiramuのタブを間違って閉じてしまったら："
   echo "     画面の何もない場所を右クリック →"
   echo "     「Suiramu」→「🎬 Suiramuを開く（動画）」"
