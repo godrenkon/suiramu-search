@@ -90,6 +90,10 @@ install_pkg fcitx5
 install_pkg fcitx5-config-qt
 echo "✅ 入力システムの準備完了"
 
+install_pkg xterm
+install_pkg pcmanfm
+install_pkg gvfs
+
 # ==== Chromium本体のインストール ====
 # Ubuntu の "chromium" / "chromium-browser" apt パッケージは、
 # バージョンによっては実体を持たない snap 転送ラッパーになっており、

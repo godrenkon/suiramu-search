@@ -8,5 +8,8 @@
     "start": "bash .devcontainer/start_search.sh",
     "setup": "bash .devcontainer/setup.sh"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "puppeteer": "^24.43.1"
+  }
 }

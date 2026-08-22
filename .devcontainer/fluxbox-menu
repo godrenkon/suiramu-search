@@ -2,5 +2,8 @@
   [exec] (🔍 Suiramuを開く（検索）) {/home/codespace/.suiramu-launch-search.sh}
   [exec] (🎬 Suiramuを開く（動画）) {/home/codespace/.suiramu-launch-video.sh}
   [separator]
+  [exec] (💻 ターミナルを開く) {xterm -fa Monospace -fs 12 -bg black -fg white}
+  [exec] (📁 ファイルマネージャーを開く) {pcmanfm}
+  [separator]
   [restart] (ウィンドウマネージャを再起動)
 [end]
